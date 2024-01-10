@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "pastebook-react",
+    "slug": "pastebook-react",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "pastebook-react"
+}
