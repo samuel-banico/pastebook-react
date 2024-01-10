@@ -5,7 +5,12 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "de67e578-5231-40dd-bb95-f4b76f9da294"
+      }
+    }
   },
   "name": "pastebook-react"
 }
