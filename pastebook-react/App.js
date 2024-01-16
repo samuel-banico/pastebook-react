@@ -1,11 +1,40 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Registration } from './navigations/RegistrationNavigation';
 
+import RegisterScreen from './screens/RegisterScreen';
+import LoginScreen from './screens/LoginScreen';
+
+import HomeScreen from './screens/HomeScreen';
+
+// with headerShown true
+import CreatePostScreen from './screens/CreatePostScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import SearchScreen from './screens/SearchScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import SecurityScreen from './screens/SecurityScreen';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <Registration/>
+    <NavigationContainer independent={true}>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="Sign Up" component={RegisterScreen} options={{headerShown: true}}/>
+
+        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+
+        <Stack.Screen name="CreatePost" component={CreatePostScreen} options={{headerShown: true}}/>
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: true}}/>
+        <Stack.Screen name="Search" component={SearchScreen} options={{headerShown: true}}/>
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{headerShown: true}}/>
+        <Stack.Screen name="Security" component={SecurityScreen} options={{headerShown: true}}/>
+
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

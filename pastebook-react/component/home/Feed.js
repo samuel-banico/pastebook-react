@@ -1,26 +1,19 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import React from 'react'
 
+import globalStyle from '../../assets/styles/globalStyle'
+
+import SinglePost from './SinglePost'
 const Feed = () => {
   return (
-    <View style={styles.feedContainer}>
-      <Text>Feed</Text>
-    </View>
+    <ScrollView contentContainerStyle={[globalStyle.colorBackground]}>
+      <SinglePost/>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-    feedContainer: {
-        flex: 1,
-        backgroundColor: 'white',
-        flexDirection: 'row',
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-    },
-    img: {
-        width: 30,
-        height: 30
-    }
+    
 })
 
 export default Feed

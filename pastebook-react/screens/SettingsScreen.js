@@ -1,12 +1,14 @@
 import { View, Text, SafeAreaView } from 'react-native'
 import React from 'react'
 
-const SettingsScreen = () => {
+import Logout from '../component/settings/Logout'
+import Security from '../component/settings/Security'
+
+const SettingsScreen = ({navigation}) => {
   return (
     <SafeAreaView>
-        <View>
-            <Text>Settings</Text>
-        </View>
+        <Security navigation={navigation}/>
+        <Logout navigation={navigation}/>
     </SafeAreaView>
   )
 }

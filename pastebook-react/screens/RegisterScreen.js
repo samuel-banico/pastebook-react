@@ -1,10 +1,10 @@
 import { View, Text, SafeAreaView, TextInput, StyleSheet, Button } from 'react-native';
 import React from 'react';
-import Login from '../component/registration/Login';
+import Register from '../component/registration/Register';
 
 const RegisterScreen = ({navigation}) => {
   return (
-    <Login navigation={navigation}/>
+    <Register navigation={navigation}/>
   )
 }
 

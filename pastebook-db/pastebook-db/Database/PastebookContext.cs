@@ -32,8 +32,7 @@ namespace pastebook_db.Database
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Change connection string here
-                optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=pastebook_db;Integrated Security=True;Trust Server Certificate=True");
+                optionsBuilder.UseSqlServer("Server=localhost;port=3306;Database=pastebookdb;User=root;");
             }
         }
 

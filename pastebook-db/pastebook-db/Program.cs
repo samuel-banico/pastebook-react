@@ -9,6 +9,7 @@ using pastebook_db.Services.Token;
 using pastebook_db.Services.Token.TokenData;
 using pastebook_db.Services.Token.TokenGenerator;
 using pastebook_db.Services.Token.TokenValidator;
+using System;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -19,11 +20,13 @@ namespace pastebook_db
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<PastebookContext>(options =>
-               options.UseSqlServer(builder.Configuration.GetConnectionString("PastebookContext") ?? throw new InvalidOperationException("Connection string 'PastebookContext' not found."), sqlServerOptionsAction: sqlOptions => 
-                {
-                    sqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
-                }));
+            /* builder.Services.AddDbContext<PastebookContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("PastebookContext") ?? throw new InvalidOperationException("Connection string 'PastebookContext' not found."), sqlServerOptionsAction: sqlOptions => 
+                 {
+                     sqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
+                 }));*/
+
+            builder.Services.AddDbContext<PastebookContext>(options => options.UseMySQL("Server=localhost;port=3306;Database=pastebookdb;User=root;"));
 
             builder.Services.AddControllers();
 
