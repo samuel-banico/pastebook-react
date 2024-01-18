@@ -4,9 +4,9 @@ import React from 'react'
 const HR = () => {
   return (
     <View style={{
-        borderBottomColor: '#f9ecf0',
-        borderBottomWidth: 2,
-        marginHorizontal: 20,
+        borderBottomColor: 'white',
+        borderBottomWidth: 1.5,
+        marginHorizontal: 15,
         marginVertical: 10,
         width: 300,
       }}/>

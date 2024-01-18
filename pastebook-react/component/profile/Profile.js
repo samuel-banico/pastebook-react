@@ -3,36 +3,43 @@ import React from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const Profile = () => {
+import HR from '../others/HR'
+
+const Profile = ({navigation}) => {
   return (
-    <View>
-        <View style={styles.container}>
+    <View style={[styles.container]}>
+        <View style={styles.bioContainer}>
             <Image 
             style={styles.img} 
             source={require('../../assets/img/user.png')}/>
 
             <Text>Name</Text>
             <Text>BIO</Text>
-            <TouchableOpacity>
+        </View>
+
+        <HR/>
+        
+        <View style={[globalStyle.alignToColumn, styles.detailsContainer]}>
+            <View>
+                <View>
+                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Birthday: </Text>
+                    <Text>##-##-####</Text>
+                </View>
+
+                <View>
+                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Gender: </Text>
+                    <Text>-----</Text>
+                </View>
+
+                <View>
+                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Mobile Number: </Text>
+                    <Text>09#########</Text>
+                </View>
+            </View>
+
+            <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
                 <Text>✏️ Edit Profile</Text>
             </TouchableOpacity>
-        </View>
-        <View>
-            <Text>DETAILS</Text>
-            <View style={globalStyle.alignToColumn}>
-                <Text>Birthday</Text>
-                <Text>##-##-####</Text>
-            </View>
-
-            <View style={globalStyle.alignToColumn}>
-                <Text>Gender</Text>
-                <Text>-----</Text>
-            </View>
-
-            <View style={globalStyle.alignToColumn}>
-                <Text>Mobile Number</Text>
-                <Text>09#########</Text>
-            </View>
         </View>
     </View>
   )
@@ -42,10 +49,22 @@ export default Profile
 
 const styles = StyleSheet.create({
     container: {
+        paddingVertical: 10,
+        paddingHorizontal: 15
+    },
+    bioContainer: {
         alignItems: 'center'
+    },
+    detailsContainer: {
+        justifyContent: 'space-between'
     },
     img: {
         width: 100,
         height: 100,
+        borderRadius: 50
+    },
+    detailsText: {
+        fontSize: 14,
+        fontWeight: '600'
     }
 })

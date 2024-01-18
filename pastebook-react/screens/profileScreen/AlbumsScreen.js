@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const AlbumsScreen = () => {
+import ProfileAlbum from '../../component/profile/ProfileAlbum'
+
+const AlbumsScreen = ({navigation}) => {
   return (
     <View>
-      <Text>AlbumsScreen</Text>
+      <ProfileAlbum navigation={navigation}/>
     </View>
   )
 }

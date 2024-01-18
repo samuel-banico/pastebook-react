@@ -4,9 +4,9 @@ import React from 'react'
 const globalStyle = StyleSheet.create({
     textTitle: {
         fontFamily: 'serif',
-        fontWeight: '600',
-        fontSize: 16,
-        color: '#230b14'
+        fontWeight: '800',
+        fontSize: 20,
+        color: '#230b14',
     },
     textParagraph: {
         fontFamily: 'sans-serif',
@@ -28,12 +28,17 @@ const globalStyle = StyleSheet.create({
     colorPimaryBG: {
         backgroundColor: '#67233e'
     },
+    colorPimaryText: {
+        color: '#67233e'
+    },
     colorSecondaryBG: {
         backgroundColor: '#7ed3bb'
     },
+    colorSecondaryText: {
+        color: '#7ed3bb'
+    },
     textInputBox: {
         borderWidth: 1,
-        borderColor: 'gray',
         borderRadius: 5,
         paddingHorizontal: 5,
         marginTop: 5,

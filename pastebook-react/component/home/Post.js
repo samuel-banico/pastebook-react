@@ -5,14 +5,15 @@ import globalStyle from '../../assets/styles/globalStyle'
 
 const Post = ({navigation}) => {
   return (
-    <View style={[globalStyle.colorBackground, styles.postContainer]}>
+    <View style={[globalStyle.colorBackground, styles.container]}>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Image 
                 source={require('../../assets/img/user.png')}
                 style={styles.img}
             />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('CreatePost')}>
+        <TouchableOpacity style={styles.textContainer}
+            onPress={() => navigation.navigate('Create Post')}>
             <Text>What's on your mind?</Text>
         </TouchableOpacity>
     </View>
@@ -20,11 +21,23 @@ const Post = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
-    postContainer: {
-        marginVertical: 5,
+    container: {
+        marginTop: 8,
         flexDirection: 'row',
-        paddingVertical: 5,
+        paddingVertical: 8,
         paddingHorizontal: 10
+    },
+    textContainer: {
+        borderWidth: 1,
+        borderRadius: 20,
+
+        justifyContent: 'center',
+
+        paddingVertical: 5,
+        paddingLeft: 20,
+        marginHorizontal: 10,
+        
+        flex: 1
     },
     img: {
         width: 30,

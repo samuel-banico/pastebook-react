@@ -1,17 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-import Security from '../component/security/Security'
+import Album from '../component/album/Album'
 
-const SecurityScreen = () => {
+const AlbumScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-        <Security/>
+      <Album navigation={navigation}/>
     </View>
   )
 }
 
-export default SecurityScreen
+export default AlbumScreen
 
 const styles = StyleSheet.create({
   container: {

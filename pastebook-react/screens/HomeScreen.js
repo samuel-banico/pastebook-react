@@ -25,8 +25,10 @@ const HomeScreen = ({navigation}) => {
                 <Header navigation={navigation}/>
                 <IconNavbar page={navigate}/>
             </View>
+
+            <View style={{paddingTop: 8, backgroundColor: 'white'}}/>
             
-            <View style={[styles.body, globalStyle.colorBackground]}>
+            <View style={{flex: 1}}>
                 { 
                     homeNavigation == 'Home' ? <FeedScreen navigation={navigation}/> :
                     homeNavigation == 'FriendRequest' ? <FriendRequestScreen/> :
@@ -48,9 +50,6 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         backgroundColor: 'white',
-        padding: 5
-    },
-    body: {
-        flex: 1
+        paddingTop: 8
     }
 })

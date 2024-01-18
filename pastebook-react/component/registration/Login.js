@@ -1,36 +1,77 @@
 import { View, Text, SafeAreaView, TextInput, StyleSheet, Button, TouchableOpacity, Image, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
 import HR from '../others/HR'
 
+import { InputValidation } from './RegisterValidation'
+
 const Login = ({navigation}) => {
+
+  const [input, setInput] = useState({
+    email: {value: '', style: 'gray'},
+    password: {value: '', style: 'gray'},
+  })
+
+  const handleChange = (fieldName, value) => {
+    setInput({
+      ...input,
+      [fieldName]: {value: value}
+    });
+  };
+
+  const borderChange = (fieldName) => {
+    setInput({
+      ...input,
+      [fieldName]: {style: 'red'}
+    });
+  }
+
+  const submitForm = () => {
+    var emptyArray = InputValidation(input)
+  
+
+    emptyArray.forEach(elem => {
+      borderChange(elem)
+    });
+
+
+
   return (
     <SafeAreaView style={[styles.container, globalStyle.textParagraph, globalStyle.colorBackground]}>
       <Image 
-            style={styles.logo} 
+            style={styles.logo}  
             source={require('../../assets/img/logo.png')}/>
 
         <View style={[globalStyle.colorBoxBG, styles.box]}>
           <View>
               <View>
                   <Text>Email: </Text>
-                  <TextInput placeholder='email' style={globalStyle.textInputBox}/>
+                  <TextInput 
+                    value={input.email.value} 
+                    onChangeText={(e) => handleChange('email', e)} 
+                    placeholder='email' 
+                    style={[globalStyle.textInputBox, {borderColor: input.email.style}]}/>
               </View>
               <View>
                   <Text>Password: </Text>
-                  <TextInput placeholder='password' style={globalStyle.textInputBox}/>
+                  <TextInput 
+                    value={input.password.value} 
+                    onChangeText={(e) => handleChange('password', e)} 
+                    placeholder='password' 
+                    style={[globalStyle.textInputBox, {borderColor: input.password.style}]}/>
               </View>
           </View>
           
-          <TouchableOpacity style={[globalStyle.colorPimaryBG, styles.loginButton]} onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity style={[globalStyle.colorPimaryBG, styles.loginButton]} 
+            onPress={() => submitForm()}>
             <Text style={{color: 'white', fontWeight: 'bold'}}>
               LOGIN
             </Text>
           </TouchableOpacity>
           <HR/>
-          <TouchableOpacity style={[globalStyle.colorSecondaryBG, styles.registerButton]} onPress={() => navigation.navigate('Sign Up')}>
+          <TouchableOpacity style={[globalStyle.colorSecondaryBG, styles.registerButton, ]} onPress={() => navigation.navigate('Sign Up')}>
             <Text style={{color: 'white', fontWeight: 'bold'}}>
               CREATE NEW ACCOUNT
             </Text>

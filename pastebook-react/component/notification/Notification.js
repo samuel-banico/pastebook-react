@@ -6,14 +6,26 @@ import SingleNotif from './SingleNotif'
 
 const Notification = () => {
   return (
-    <View style={[globalStyle.colorBackground]}>
-        <View style={globalStyle.alignToColumn}>
-            <Text style={globalStyle.textTitle}>Notifications</Text>
-            <TouchableOpacity>
-                <Text>ALL</Text>
-            </TouchableOpacity>
-        </View>
-        <ScrollView>
+    <View style={[globalStyle.colorBackground, styles.container]}>
+        <ScrollView contentContainerStyle={{paddingBottom: 5}} showsVerticalScrollIndicator={false}>
+            <View style={[globalStyle.alignToColumn, styles.headerContainer]}>
+                <Text style={globalStyle.textTitle}>Notifications</Text>
+                <TouchableOpacity style={[{paddingTop: 2}]}>
+                    <Text>ALL</Text>
+                </TouchableOpacity>
+            </View>
+
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
+            <SingleNotif/>
             <SingleNotif/>
         </ScrollView>   
     </View>
@@ -25,6 +37,12 @@ export default Notification
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        paddingHorizontal: 15
+    },
+    headerContainer: {
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 8,
     }
 })

@@ -3,14 +3,18 @@ import React from 'react'
 
 import Post from '../../component/home/Post'
 import Feed from '../../component/home/Feed'
+import FriendsOnline from '../../component/home/FriendsOnline'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
 const FeedScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-      <Post navigation={navigation}/>
-      <Feed/>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <FriendsOnline/>
+        <Post navigation={navigation}/>
+        <Feed/>
+      </ScrollView>
     </View>
   )
 }

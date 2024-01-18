@@ -6,7 +6,7 @@ import FriendRequest from '../../component/friendRequest/FriendRequest'
 
 const FriendRequestScreen = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <FriendRequest/>
     </SafeAreaView>
   )

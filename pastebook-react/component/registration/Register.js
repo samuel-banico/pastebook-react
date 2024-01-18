@@ -7,6 +7,8 @@ import { Picker } from '@react-native-picker/picker';
 import globalStyle from '../../assets/styles/globalStyle'
 import HR from '../others/HR'
 
+import { InputValidation } from './RegisterValidation';
+
 const Register = ({navigation}) => {
 
   const [formData, setFormData] = useState({
@@ -28,7 +30,9 @@ const Register = ({navigation}) => {
 
   // Submitted
 const handleSubmit = () => {
-  console.log('Form Data:', formData);
+  var emptyFields = InputValidation(formData);
+
+  console.log(emptyFields)
 }
 
   const [confirmPassword, setConfirmPassword] = useState('');

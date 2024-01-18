@@ -5,17 +5,17 @@ import globalStyle from '../../assets/styles/globalStyle'
 
 const SingleNotif = () => {
   return (
-    <View style={globalStyle.alignToColumn}>
+    <View style={[globalStyle.alignToColumn, styles.container]}>
       <Image 
         source={require('../../assets/img/user.png')}
         style={styles.img}
         />
-        <View>
-            <View style={styles.alignToColumn}>
-                <Text>Name</Text>
-                <Text>Time</Text>
+        <View style={[styles.textContainer]}>
+            <View style={[styles.alignToColumn, {alignItems: 'center'}]}>
+                <Text style={styles.nameStyle}>Name </Text>
+                <Text>Description</Text>
             </View>
-            <Text>Label</Text>
+            <Text style={styles.timeStyle}>Time</Text>
         </View>
     </View>
   )
@@ -24,11 +24,28 @@ const SingleNotif = () => {
 export default SingleNotif
 
 const styles = StyleSheet.create({
-    img: {
-        width: 50,
-        height: 50
-    },
-    alignToColumn: {
-        flexDirection: 'row'
-    }
+  container: {
+    marginTop: 10,
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center'
+  },
+  img: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      marginRight: 10
+  },
+  alignToColumn: {
+      flexDirection: 'row'
+  },
+  nameStyle: {
+    fontWeight: '600',
+    fontSize: 16
+  },
+  timeStyle: {
+    fontWeight: '400',
+    fontSize: 12
+  }
 })
