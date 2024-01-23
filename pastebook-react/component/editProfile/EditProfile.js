@@ -1,5 +1,9 @@
-import { StyleSheet, Text, Touchable, TouchableOpacity, View, Image, TextInput, ScrollView } from 'react-native'
+import { StyleSheet, Text, Touchable, TouchableOpacity, View, Image, TextInput, ScrollView, Animated, Easing, Platform  } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
+
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 
 import globalStyle from '../../assets/styles/globalStyle'
 
@@ -7,20 +11,50 @@ import HR from '../others/HR'
 
 const EditProfile = () => {
     const [inputStates, setInputStates] = useState({
-        bio: {state: false, style:'black', ref: useRef(null)},
-        firstName: {state: false, style:'black', ref: React.useRef(null)},
-        lastName: {state: false, style:'black', ref: React.useRef(null)},
-        mobileNumber: {state: false, style:'black', ref: React.useRef(null)},
-        birthday: {state: false, style:'black', ref: React.useRef(null)},
-        gender: {state: false, style:'black', ref: React.useRef(null)},
+        profPic: {state: false, style: 'black'},
+        bio: {value: '', state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        firstName: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        lastName: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        mobileNumber: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        birthday: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        gender: {value: '', state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
     })
+
+    const [image, setImage] = useState(null);
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        });
+
+        if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        }
+    };
 
     const toggleEditButton = (inputName) => {
         setInputStates({
             ...inputStates,
-            [inputName]: {state: true, style: '#7ed3bb'}
+            [inputName]: {
+                ...inputStates[inputName],
+                state: true, 
+                style: '#7ed3bb'
+            }
         })
     }
+
+    const onChangeValue = (fieldName, value) => {
+        setInputStates({
+          ...inputStates,
+          [fieldName]: {
+            ...inputStates[fieldName],
+            value: value
+          }
+        });
+      };
 
     const focusText = (inputName) => {
         inputStates[inputName].ref.current.focus();
@@ -34,6 +68,45 @@ const EditProfile = () => {
         setShowSave(trueState)
     }, [inputStates])
 
+    const [gender, setGender] = useState('');
+
+  // BIRTHDAY
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+
+  const toggleDatePicker = () => {
+    setShowPicker(!showPicker);
+  }
+
+  const onChange = ({ type }, selectedDate) => {
+    if(type == "set") {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+
+      toggleDatePicker();
+      onChangeValue('birthday', formatDate(currentDate))
+    } else {
+      toggleDatePicker();
+    }
+
+    if(InputEmpty(inputStates.birthday.value)) {
+      emptyInputOnBlur(['birthday']);
+    } else {
+      hasValueOnBlur('birthday')
+    }
+  }
+
+  const formatDate = (rawDate) => {
+    let date = new Date(rawDate)
+    let year = date.getFullYear();
+    let month = date.getMonth()+1;
+    let day = date.getDate();
+
+    month = month < 10 ? `0${month}` : month
+    day = day < 10 ? `0${day}` : day
+    return `${day}-${month}-${year}`
+  }
+
   return (
     <View style={[globalStyle.colorBackground, styles.container]}>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -41,14 +114,16 @@ const EditProfile = () => {
             <View>
                 <View style={[globalStyle.alignToColumn, styles.titleContainer]}>
                     <Text style={globalStyle.textTitle}>Profile Picture</Text>
-                    <TouchableOpacity style={styles.editContainer}>
+                    <TouchableOpacity style={styles.editContainer} onPress={pickImage}>
                         <Text>Edit</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={[styles.imgContainer]}>
+                    { image ? <Image source={{ uri: image }} style={{ width: 200, height: 200 }}/> : 
                     <Image 
-                        style={styles.img} 
-                        source={require('../../assets/img/user.png')}/>
+                        style={[styles.img, {borderColor: inputStates.profPic.style, borderWidth: 1}]} 
+                        source={require('../../assets/img/user.png')}/>}
+                        
                 </View>
             </View>
 
@@ -110,9 +185,9 @@ const EditProfile = () => {
                         }
                     </View>
                     <TextInput 
-                    style={[{borderColor: inputStates.lastName.style}, styles.textContainer]}
-                    editable={inputStates.lastName.state} 
-                    placeholder='LastName'></TextInput>
+                        style={[{borderColor: inputStates.lastName.style}, styles.textContainer]}
+                        editable={inputStates.lastName.state} 
+                        placeholder='LastName'></TextInput>
                 </View>
 
                 <View>
@@ -130,7 +205,9 @@ const EditProfile = () => {
                     </View>
                     <TextInput 
                     style={[{borderColor: inputStates.mobileNumber.style}, styles.textContainer]}
-                    editable={inputStates.mobileNumber.state} 
+                    editable={inputStates.mobileNumber.state}
+                    value={inputStates.mobileNumber.value}
+                    onChangeText={(e) => onChangeValue('mobileNumber', e)}
                     placeholder='MobileNumber'></TextInput>
                 </View>
 
@@ -147,10 +224,28 @@ const EditProfile = () => {
                             )
                         }
                     </View>
-                    <TextInput 
-                    style={[{borderColor: inputStates.birthday.style}, styles.textContainer]}
-                    editable={inputStates.birthday.state} 
-                    placeholder='Birthday'></TextInput>
+
+                    <View>
+                        <View style={[styles.textContainer, {borderColor: inputStates.birthday.style}]}>
+                            {showPicker && (
+                                <DateTimePicker
+                                mode='date'
+                                display='calendar'
+                                value={date}
+                                onChange={onChange}
+                                maximumDate={new Date()}
+                                minimumDate={new Date('1924-01-01')}
+                                />
+                            )}
+                            <TouchableOpacity disabled={!inputStates.birthday.state} onPress={toggleDatePicker}>
+                                <TextInput 
+                                placeholder='1-01-1990'
+                                value={inputStates.birthday.value}
+                                onChangeText={(e) => onChangeValue('birthday', e)}
+                                editable={false}/>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
 
                 
@@ -167,10 +262,22 @@ const EditProfile = () => {
                             )
                         }
                     </View>
-                    <TextInput 
-                    style={[{borderColor: inputStates.gender.style}, styles.textContainer]}
-                    editable={inputStates.gender.state} 
-                    placeholder='Gender'></TextInput>
+                    <View>
+                        <View style={[styles.textContainer, {borderColor: inputStates.gender.style}]}>
+                            <Picker
+                                enabled={inputStates.gender.state}
+                                selectedValue={gender}
+                                onValueChange={(itemValue, itemIndex) => {
+                                    setGender(itemValue)
+                                    onChangeValue('gender', itemValue)}
+                                }>
+                                <Picker.Item label="Gender" value='' enabled={false}/>
+                                <Picker.Item label="Male" value="0" />
+                                <Picker.Item label="Female" value="1"/>
+                                <Picker.Item label="Others" value="2"/>
+                            </Picker>
+                        </View>
+                    </View>
                 </View>
                 
                 {
@@ -190,6 +297,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 15,
+        paddingVertical: 10
     },
     titleContainer: {
         alignItems: 'center',
@@ -207,7 +315,8 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         paddingVertical: 2,
-        marginVertical: 5
+        marginVertical: 5,
+        marginBottom: 15
     },
     saveContainer: {
         marginVertical: 10,

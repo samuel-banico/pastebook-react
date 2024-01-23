@@ -23,7 +23,7 @@ const HomeScreen = ({navigation}) => {
         <SafeAreaView style={[styles.container]}>
             <View style={[styles.headerContainer, globalStyle.colorBackground]}>
                 <Header navigation={navigation}/>
-                <IconNavbar page={navigate}/>
+                <IconNavbar page={navigate} currPage={homeNavigation}/>
             </View>
 
             <View style={{paddingTop: 8, backgroundColor: 'white'}}/>

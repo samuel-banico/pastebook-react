@@ -32,7 +32,7 @@ namespace pastebook_db.Database
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;port=3306;Database=pastebookdb;User=root;");
+                optionsBuilder.UseSqlServer("PastebookContext");
             }
         }
 

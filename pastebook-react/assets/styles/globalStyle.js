@@ -49,7 +49,8 @@ const globalStyle = StyleSheet.create({
 
     },
     alignToColumn: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        alignItems: 'center'
     }
 })
 

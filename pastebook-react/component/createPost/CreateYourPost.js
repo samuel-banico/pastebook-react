@@ -4,10 +4,18 @@ import React, { useState } from 'react'
 import globalStyle from '../../assets/styles/globalStyle'
 import { Picker } from '@react-native-picker/picker';
 
+import Toast from 'react-native-toast-message';
 
 const CreateYourPost = () => {
 
   const [shareOption, setShareOption] = useState('public')
+  const showToast = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Hello',
+      text2: 'This is some something 👋'
+    });
+  }
 
   return (
     <ScrollView contentContainerStyle={[globalStyle.colorBackground, styles.container]}>
@@ -27,7 +35,8 @@ const CreateYourPost = () => {
         <TextInput
           multiline={true}
           numberOfLines={4}
-          placeholder= "What's on your mind?"/>
+          placeholder= "What's on your mind?"
+          autoFocus={true}/>
       </View>
       
       <View style={[globalStyle.alignToColumn, styles.optionsContainer]}>
@@ -40,7 +49,7 @@ const CreateYourPost = () => {
               <Picker.Item label="🌐 Public" value='public'/>
               <Picker.Item label="🫂 Friends" value="friends" />
             </Picker>
-        <TouchableOpacity style={[styles.button]}>
+        <TouchableOpacity style={[styles.button]} onPress={showToast}>
           <Text>Post</Text>
         </TouchableOpacity>
       </View>

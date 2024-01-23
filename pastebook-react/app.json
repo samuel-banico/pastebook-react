@@ -10,7 +10,15 @@
       "eas": {
         "projectId": "de67e578-5231-40dd-bb95-f4b76f9da294"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ]
   },
   "name": "pastebook-react"
 }

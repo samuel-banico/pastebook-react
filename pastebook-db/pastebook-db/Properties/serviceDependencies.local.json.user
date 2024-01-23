@@ -1,4 +1,20 @@
 {
-  "dependencies": {},
-  "parameters": {}
+  "dependencies": {
+    "mssql1": {
+      "restored": true,
+      "restoreTime": "2024-01-23T08:28:06.0311748Z"
+    }
+  },
+  "parameters": {
+    "mssql1.subscriptionId": {
+      "Name": "mssql1.subscriptionId",
+      "Type": "subscription",
+      "Value": "09e32bb7-6218-4d27-a5b5-66a8625c8c6c"
+    },
+    "mssql1.resourceGroupName": {
+      "Name": "mssql1.resourceGroupName",
+      "Type": "resourceGroup",
+      "Value": "banico"
+    }
+  }
 }

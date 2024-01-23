@@ -13,7 +13,7 @@ const FeedScreen = ({navigation}) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <FriendsOnline/>
         <Post navigation={navigation}/>
-        <Feed/>
+        <Feed navigation={navigation}/>
       </ScrollView>
     </View>
   )

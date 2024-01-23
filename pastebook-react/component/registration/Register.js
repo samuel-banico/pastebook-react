@@ -1,5 +1,5 @@
-import { View, Text, SafeAreaView, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, {useState} from 'react'
+import { View, Text, SafeAreaView, TextInput, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing } from 'react-native'
+import React, {useState, useRef} from 'react'
 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker';
@@ -7,44 +7,181 @@ import { Picker } from '@react-native-picker/picker';
 import globalStyle from '../../assets/styles/globalStyle'
 import HR from '../others/HR'
 
-import { InputValidation } from './RegisterValidation';
+import { InputValidation, InputEmpty, PasswordIsValid, EmailIsValid, MobileNumberIsValid } from './RegisterValidation';
 
 const Register = ({navigation}) => {
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    mobileNumber: '',
-    password: '',
-    birthday: '',
-    gender: '',
+    firstName: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    lastName: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    email: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    mobileNumber: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    password: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    birthday: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
+    gender: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
   });
 
   const handleChange = (fieldName, value) => {
     setFormData({
       ...formData,
-      [fieldName]: value,
+      [fieldName]: {
+        ...formData[fieldName],
+        value: value
+      }
     });
   };
 
-  // Submitted
-const handleSubmit = () => {
-  var emptyFields = InputValidation(formData);
+  const borderChange = (formData, elem, style) => {
+    formData[elem] = {
+      ...formData[elem],
+      style: style
+    };
+  };
 
-  console.log(emptyFields)
-}
+  const missingFieldsAnimation = (emptyArray) => {
+    emptyArray.forEach((key) => {
+      const shakeAnimation = formData[key].shakeAnimation;
+      shakeAnimation.setValue(0);
+
+      Animated.sequence([
+        Animated.timing(shakeAnimation, { toValue: 10, duration: 100, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(shakeAnimation, { toValue: -10, duration: 100, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(shakeAnimation, { toValue: 0, duration: 100, easing: Easing.linear, useNativeDriver: true }),
+      ]).start();
+    });
+  }
+
+  const handleEmptyFieldsOnSubmit = (emptyArray) => {
+    missingFieldsAnimation(emptyArray);
+
+    setFormData(prevInput => {
+      const updatedInput = { ...prevInput };
+  
+      Object.keys(updatedInput).forEach((key) => {
+        if (emptyArray.includes(key)) {
+          borderChange(updatedInput, key, 'red');
+        } else {
+          borderChange(updatedInput, key, 'gray');
+        }
+      });
+  
+      return updatedInput;
+    });
+  };
+
+  const emptyInputOnBlur = (emptyArray) => {
+    missingFieldsAnimation(emptyArray);
+
+    setFormData(prevInput => {
+      const updatedInput = { ...prevInput };
+  
+      Object.keys(updatedInput).forEach((key) => {
+        if (emptyArray.includes(key)) {
+          borderChange(updatedInput, key, 'red');
+        }
+      });
+  
+      return updatedInput;
+    });
+  }
+
+  const hasValueOnBlur = (elem) => {
+    setFormData({
+      ...formData,
+      [elem]: {
+        ...formData[elem],
+        style: 'gray'
+      }
+    });
+  }
+
+  const firstNameOnBlur = () => {
+    if(InputEmpty(formData.firstName.value))
+      return emptyInputOnBlur(['firstName']);
+
+    hasValueOnBlur('firstName')
+  }
+
+  const lastNameOnBlur = () => {
+    if(InputEmpty(formData.lastName.value))
+      return emptyInputOnBlur(['lastName']);
+
+    hasValueOnBlur('lastName')
+  }
+
+  const [emailErrorMessage, setEmailErrorMessage] = useState('')
+  const emailOnBlur = () => {
+    if(InputEmpty(formData.email.value))
+      return emptyInputOnBlur(['email']);
+
+    if(!EmailIsValid(formData.email.value)) {
+      setEmailErrorMessage('Invalid Email')
+      return emptyInputOnBlur(['email']);
+    } else {
+      setEmailErrorMessage('')
+    }
+
+    hasValueOnBlur('email')
+  }
+
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
+  const passwordOnBlur = () => {
+    if(InputEmpty(formData.password.value))
+      return emptyInputOnBlur(['password']);
+
+    const errorMessage = PasswordIsValid(formData.password.value);
+    if(errorMessage != '') {
+      setPasswordErrorMessage(errorMessage)
+      return emptyInputOnBlur(['password']);
+    } else {
+      setPasswordErrorMessage('')
+    }
+    hasValueOnBlur('password')
+  }
+
+  const [mobileNumberErrorMessage, setMobileNumberErrorMessage] = useState('')
+  const mobileNumberOnBlur = () => {
+    if(InputEmpty(formData.mobileNumber.value))
+      return emptyInputOnBlur(['mobileNumber']);
+
+    if(!MobileNumberIsValid(formData.mobileNumber.value)) {
+      setMobileNumberErrorMessage('Invalid PH Phone Number')
+      return emptyInputOnBlur(['mobileNumber']);
+    } else {
+      setMobileNumberErrorMessage('')
+    }
+
+    hasValueOnBlur('mobileNumber')
+  }
+
+  const genderOnBlur = () => {
+    if(InputEmpty(formData.gender.value))
+      return emptyInputOnBlur(['gender']);
+
+    hasValueOnBlur('gender')
+  }
+
+  // Submitted
+  const submitForm = () => {
+    var emptyArray = InputValidation(formData);
+
+    if(emptyArray.length > 0) {
+      handleEmptyFieldsOnSubmit(emptyArray);
+    } else {
+      
+      navigation.navigate('Home');
+    }
+  }
 
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSame, setPasswordSame] = useState(true);
 
   // GENDER
   const [gender, setGender] = useState('');
-  const [selectedValue, setSelectedValue] = useState('');
 
   // BIRTHDAY
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const [birthday, setBirthday] = useState("");
 
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
@@ -59,6 +196,12 @@ const handleSubmit = () => {
       handleChange('birthday', formatDate(currentDate))
     } else {
       toggleDatePicker();
+    }
+
+    if(InputEmpty(formData.birthday.value)) {
+      emptyInputOnBlur(['birthday']);
+    } else {
+      hasValueOnBlur('birthday')
     }
   }
 
@@ -77,72 +220,131 @@ const handleSubmit = () => {
     <ScrollView contentContainerStyle={[styles.container, globalStyle.colorBackground]}>
         <View style={[globalStyle.colorBoxBG, styles.box]}>
           <View style={styles.alignToColumn}>
-            <TextInput placeholder='First Name' style={[globalStyle.textInputBox, {width: 135}]}
-              value={formData.firstName} onChangeText={(e) => handleChange('firstName', e)}
-            />
+            {/* FIRST NAME */}
+            <Animated.View 
+              style={{ transform: [{ translateX: formData.firstName.value === '' ? formData.firstName.shakeAnimation : 0 }] }}>
+              <TextInput 
+                placeholder='First Name' 
+                style={[globalStyle.textInputBox, {width: 135, borderColor: formData.firstName.style}]}
+                value={formData.firstName.value} 
+                onChangeText={(e) => handleChange('firstName', e)}
+                onBlur={firstNameOnBlur}/>
+            </Animated.View>
+
             <View style={{padding:5}}/>
-            <TextInput placeholder='Last Name' style={[globalStyle.textInputBox, {width: 135}]}
-              value={formData.lastName} onChangeText={(e) => handleChange('lastName', e)}
-            />
+            {/* LAST NAME */}
+            <Animated.View 
+              style={{ transform: [{ translateX: formData.lastName.value === '' ? formData.lastName.shakeAnimation : 0 }] }}>
+              <TextInput 
+                placeholder='Last Name' 
+                style={[globalStyle.textInputBox, {width: 135, borderColor: formData.lastName.style}]}
+                value={formData.lastName.value} 
+                onChangeText={(e) => handleChange('lastName', e)}
+                onBlur={lastNameOnBlur}/>
+            </Animated.View>
           </View>
-          <TextInput placeholder='Email' style={globalStyle.textInputBox}
-              value={formData.email} onChangeText={(e) => handleChange('email', e)}
-          />
-          <TextInput placeholder='Mobile Number' style={globalStyle.textInputBox}
-              value={formData.mobileNumber} onChangeText={(e) => handleChange('mobileNumber', e)}
-          />
+
+          {/* EMAIL */}
+          <Animated.View style={{ transform: [{ translateX: formData.email.value === '' ? formData.email.shakeAnimation : 0 }] }}>
+            <TextInput 
+              placeholder='Email' 
+              style={[globalStyle.textInputBox, {borderColor: formData.email.style}]}
+              value={formData.email.value} 
+              onChangeText={(e) => handleChange('email', e)}
+              onBlur={emailOnBlur}/>
+          </Animated.View>
+          {
+            emailErrorMessage && (
+              <Text>{emailErrorMessage}</Text>
+            )
+          }
+
+          {/* Mobile Number */}
+          <Animated.View style={{ transform: [{ translateX: formData.mobileNumber.value === '' ? formData.mobileNumber.shakeAnimation : 0 }] }}>
+            <TextInput 
+              placeholder='Mobile Number' 
+              style={[globalStyle.textInputBox, {borderColor: formData.mobileNumber.style}]}
+              value={formData.mobileNumber.value} 
+              onChangeText={(e) => handleChange('mobileNumber', e)}
+              onBlur={mobileNumberOnBlur}/>
+          </Animated.View>
+          {
+            mobileNumberErrorMessage && (
+              <Text>{mobileNumberErrorMessage}</Text>
+            )
+          }
 
           <HR/>
-          <TextInput placeholder='Password' style={globalStyle.textInputBox}
-            value={formData.password} onChangeText={(e) => handleChange('password', e)}
-          />
-          <TextInput placeholder='Confirm Password' style={globalStyle.textInputBox}
-            onChangeText={setConfirmPassword}
-          />
+          <Animated.View style={{ transform: [{ translateX: !(formData.password.value) ? formData.password.shakeAnimation : 0 }] }}>
+            <TextInput 
+              placeholder='Password' 
+              style={[globalStyle.textInputBox, {borderColor: formData.password.style}]}
+              value={formData.password.value} 
+              onChangeText={(e) => handleChange('password', e)}
+              onBlur={passwordOnBlur}/>
+            {
+              (formData.password.value).trim === '' && (
+                <TextInput 
+                  placeholder='Confirm Password' 
+                  style={[globalStyle.textInputBox, {borderColor: formData.password.style}]}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}/>
+              )
+            }
+          </Animated.View>
+          {
+            passwordErrorMessage && (
+              <Text>{passwordErrorMessage}</Text>
+            )
+          }
+          
           <HR/>
 
-          <View style={styles.alignToColumn}>
-            <View>
-              <Text>Birthday: </Text>
-              <View style={[globalStyle.textInputBox, {width: 135}]}>
-                {showPicker && (
-                  <DateTimePicker
-                    mode='date'
-                    display='spinner'
-                    value={date}
-                    onChange={onChange}
-                    maximumDate={new Date()}
-                    minimumDate={new Date('1924-01-01')}
-                  />
-                )}
-                <TouchableOpacity onPress={toggleDatePicker}>
-                  <TextInput 
-                    placeholder='1-01-1990'
-                    value={formData.birthday}
-                    onChangeText={(e) => handleChange('birthday', e)}
-                    editable={false}
-                  />
-                </TouchableOpacity>
-              </View>
+          <View>
+              <Animated.View style={{ transform: [{ translateX: formData.birthday.value === '' ? formData.birthday.shakeAnimation : 0 }] }}>
+                <View style={[globalStyle.textInputBox, {borderColor: formData.birthday.style}]}>
+                  {showPicker && (
+                    <DateTimePicker
+                      mode='date'
+                      display='calendar'
+                      value={date}
+                      onChange={onChange}
+                      maximumDate={new Date()}
+                      minimumDate={new Date('1924-01-01')}
+                    />
+                  )}
+                  <TouchableOpacity onPress={toggleDatePicker}>
+                    <TextInput 
+                      placeholder='1-01-1990'
+                      value={formData.birthday.value}
+                      onChangeText={(e) => handleChange('birthday', e)}
+                      editable={false}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
             </View>
             
             <View>
-              <Picker
-                style={[globalStyle.textInputBox, {width: 135}]}
-                selectedValue={gender}
-                onValueChange={(itemValue, itemIndex) => {
-                  setGender(itemValue)
-                  handleChange('gender', itemValue)}
-                }>
-                <Picker.Item label="Gender" value='' enabled={false}/>
-                <Picker.Item label="Male" value="0" />
-                <Picker.Item label="Female" value="1"/>
-                <Picker.Item label="Others" value="2"/>
-              </Picker>
+              <Animated.View style={{ transform: [{ translateX: formData.gender.value === '' ? formData.gender.shakeAnimation : 0 }] }}>
+                <View style={[globalStyle.textInputBox, {borderColor: formData.gender.style}]}>
+                  <Picker
+                    selectedValue={gender}
+                    onValueChange={(itemValue, itemIndex) => {
+                      setGender(itemValue)
+                      handleChange('gender', itemValue)}
+                    }
+                    onBlur={genderOnBlur}>
+                    <Picker.Item label="Gender" value='' enabled={false}/>
+                    <Picker.Item label="Male" value="0" />
+                    <Picker.Item label="Female" value="1"/>
+                    <Picker.Item label="Others" value="2"/>
+                  </Picker>
+                </View>
+              </Animated.View>
             </View>
-          </View>
             
-          <TouchableOpacity onPress={handleSubmit} style={[styles.registerButton, globalStyle.colorSecondaryBG]}>
+          <TouchableOpacity onPress={submitForm} style={[styles.registerButton, globalStyle.colorSecondaryBG]}>
             <Text>Sign-Up</Text>
           </TouchableOpacity>
         </View>

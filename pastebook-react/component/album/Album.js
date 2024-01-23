@@ -1,5 +1,7 @@
-import { ScrollView, StyleSheet, Text, View, TextInput, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { ScrollView, StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Platform } from 'react-native'
+import React, { useState, useEffect } from 'react'
+
+import * as ImagePicker from 'expo-image-picker';
 
 import globalStyle from '../../assets/styles/globalStyle'
 
@@ -7,6 +9,21 @@ import HR from '../others/HR'
 import SinglePhoto from './SinglePhoto'
 
 const Album = ({navigation}) => {
+  const [image, setImage] = useState(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   return (
     <View style={[styles.container, globalStyle.colorBackground]}>
       <ScrollView>
@@ -20,12 +37,13 @@ const Album = ({navigation}) => {
 
         <View style={[styles.photoContainer]}>
           <View style={[globalStyle.alignToColumn, styles.photoListContainer]}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={pickImage}>
                 <Image
                     resizeMode='contain'
                     style={styles.img}
                     source={require('../../assets/img/add_image.png')}/>
             </TouchableOpacity>
+            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
             <SinglePhoto navigation={navigation}/>
             <SinglePhoto navigation={navigation}/>
             <SinglePhoto navigation={navigation}/>
