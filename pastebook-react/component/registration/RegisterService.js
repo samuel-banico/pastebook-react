@@ -1,12 +1,17 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const RegisterService = () => {
-  return (
-    <View>
-      <Text>RegisterService</Text>
-    </View>
-  )
+import axios from 'axios';
+
+import { config } from '../../assets/config/config';
+
+const accessURL = `${config()}/api/access`;
+
+export const register = async(data) => {
+  return await axios.post(accessURL + '/register', data)
 }
 
-export default RegisterService
+export const login = async(data) => {
+  console.log(data);
+  return await axios.post(accessURL + '/login', data)
+}

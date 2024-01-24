@@ -1,14 +1,31 @@
 import { View, Text, SafeAreaView, TextInput, StyleSheet, Button, TouchableOpacity, Image, ScrollView, Animated, Easing } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react'
 
+import Toast from 'react-native-toast-message';
+
 import globalStyle from '../../assets/styles/globalStyle'
 
+import {getTokenData, setTokenData} from '../others/LocalStorage'
 import { InputValidation, InputEmpty } from './RegisterValidation'
 
 import HR from '../others/HR'
 
+import { login } from './RegisterService';
+
+
 const Login = ({navigation, fetchData}) => {
 
+  useEffect(() => {
+      const getToken = async() => {
+        const val = await getTokenData();
+
+        if(val)
+          navigation.navigate('Home')
+      }
+
+      getToken()
+  }, [])
+  
   const [input, setInput] = useState({
     email: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
     password: { value: '', style: 'gray', shakeAnimation: useRef(new Animated.Value(0)).current},
@@ -124,14 +141,56 @@ const Login = ({navigation, fetchData}) => {
     hasValueOnBlur('password')
   }
 
+  const failLogin = (text1, text2) => {
+    Toast.show({
+      type: 'error',
+      text1: text1,
+      text2: text2
+    });
+
+    emptyInputOnBlur(['email'])
+  }
+
+  const checkCredentials = async (user) => {
+    fetchData(true)
+    const result = await login(user)
+    .then(response => {
+      console.log(response)
+      resetPage();
+
+    })
+    .catch(error => {
+      fetchData(false)
+
+      if(error.response && error.response.data.result === 'incorrect_credentials') 
+        failLogin('Login Failed', 'Email or Password is incorrect, kindly try again.');
+      else if(error.response && error.response.data.errors.Email) 
+        failLogin('Login Failed', 'Not a valid email');
+      else {
+        failLogin('Something is wrong', 'Unindentified error, check logs')
+        console.log(error)
+      }
+      console.log(error.response)
+    })
+    fetchData(false)
+  }
+
   const submitForm = () => {
     var emptyArray = InputValidation(input);
 
     if(emptyArray.length > 0)
       return handleEmptyFieldsOnSubmit(emptyArray);
 
-    resetPage();
-    fetchData();
+    var user = {
+      email: '',
+      password: ''
+    }
+
+    Object.keys(input).forEach((key) => {
+      user[key] = input[key].value;
+    });
+
+    checkCredentials(user);
   }
 
   return (

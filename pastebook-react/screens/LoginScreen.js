@@ -4,27 +4,23 @@ import Login from '../component/registration/Login';
 
 import LoadingScreen from './LoadingScreen';
 
+import Modal from 'react-native-modal'
+
+import Loading from '../component/others/Loading';
 
 const LoginScreen = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = () => {
-    setIsLoading(true); 
-
-    setTimeout(() => {
-      navigation.navigate('Home');
-
-      setIsLoading(false); 
-    }, 2000);
-  };
+  const showLoading = (value) => {
+    setIsLoading(value)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {
-        isLoading ? <LoadingScreen/> : (
-          <Login navigation={navigation} fetchData={fetchData}/>
-        )
-      }
+      <Login navigation={navigation} fetchData={showLoading}/>
+      <Modal isVisible={isLoading}>
+        <Loading />
+      </Modal>
     </SafeAreaView>
     
   )

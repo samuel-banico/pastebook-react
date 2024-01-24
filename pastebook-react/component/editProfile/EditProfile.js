@@ -30,8 +30,8 @@ const EditProfile = () => {
         quality: 1,
         });
 
-        if (!result.canceled) {
-        setImage(result.assets[0].uri);
+        if (!result.canceled) { 
+            setImage(result.assets[0].uri);
         }
     };
 

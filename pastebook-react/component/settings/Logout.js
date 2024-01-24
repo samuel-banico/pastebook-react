@@ -3,12 +3,23 @@ import React from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
+import { removeTokenData } from '../others/LocalStorage'
+
 const Logout = ({navigation}) => {
+  const removeToken = async() => {
+    await removeTokenData()
+  }
+
+  const logOut = () => {
+    removeToken()
+    navigation.navigate('Login')
+  }
+
   return (
     <View>
         <TouchableOpacity 
           style={[globalStyle.colorPimaryBG, styles.container]}
-          onPress={() => navigation.navigate('Login')}>
+          onPress={logOut}>
             <Text style={[styles.textContainer]}>Log out</Text>
         </TouchableOpacity>
     </View>

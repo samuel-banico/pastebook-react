@@ -12,8 +12,8 @@ using pastebook_db.Database;
 namespace pastebook_db.Migrations
 {
     [DbContext(typeof(PastebookContext))]
-    [Migration("20240123083147_initial-migrate")]
-    partial class initialmigrate
+    [Migration("20240124025408_initialMigration")]
+    partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

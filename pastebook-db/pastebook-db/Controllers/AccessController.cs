@@ -83,7 +83,7 @@ namespace pastebook_db.Controllers
         {
             var existingUser = _userRepository.GetUserByEmail(userRegister.Email);
             if (existingUser != null)
-                return BadRequest(new { result = "user_already_exist" });
+                return BadRequest(new { result = "email_taken" });
 
             var generatedSalt = HelperFunction.GenerateRandomString();
             var newUser = new User
@@ -104,7 +104,7 @@ namespace pastebook_db.Controllers
             };
 
             if (!_accessRepository.RegisterUser(newUser))
-                return BadRequest(new { result = "not_legitimate_email" });
+                return BadRequest(new { result = "invalid_email" });
 
             return Ok(new { result = "registered" });
         }
