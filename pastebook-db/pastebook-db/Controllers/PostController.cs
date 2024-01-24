@@ -2,6 +2,7 @@
 using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -13,20 +14,23 @@ namespace pastebook_db.Controllers
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
         private readonly FriendRepository _friendRepository;
+        private readonly TokenController _tokenController;
 
-        public PostController(PostRepository postRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository)
+        public PostController(PostRepository postRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository, TokenController tokenController)
         {
             _postRepository = postRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _friendRepository = friendRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
         public ActionResult<PostDTO> GetPostById(Guid postId)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -45,7 +49,8 @@ namespace pastebook_db.Controllers
         public ActionResult<List<PostDTO>> GetUserTimeline()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -71,7 +76,8 @@ namespace pastebook_db.Controllers
         public ActionResult<List<Post>> GetOtherUserTimeline()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -100,7 +106,8 @@ namespace pastebook_db.Controllers
         public ActionResult<List<PostDTO>> GetAllPostsOfFriends()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return NotFound(new { result = "no_user"});

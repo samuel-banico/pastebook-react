@@ -2,6 +2,7 @@
 using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
+using pastebook_db.Services.Token.TokenData;
 using System.Diagnostics;
 
 namespace pastebook_db.Controllers
@@ -13,12 +14,14 @@ namespace pastebook_db.Controllers
         private readonly HomeRepository _repo;
         private readonly UserRepository _userRepository;
         private readonly FriendRepository _friendRepository;
+        private readonly TokenController _tokenController;
 
-        public HomeController(HomeRepository repo, UserRepository userRepository, FriendRepository friendRepository)
+        public HomeController(HomeRepository repo, UserRepository userRepository, FriendRepository friendRepository, TokenController tokenController)
         {
             _repo = repo;
             _userRepository = userRepository;
             _friendRepository = friendRepository;
+            _tokenController = tokenController;
         }
 
         // Search Modal
@@ -26,7 +29,8 @@ namespace pastebook_db.Controllers
         public ActionResult<IEnumerable<UserSendDTO>?> SearchUserByString(string user)
         {
             var token = Request.Headers["Authorization"];
-            var loggedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
                 return BadRequest(new { result = "no_user" });
@@ -50,7 +54,8 @@ namespace pastebook_db.Controllers
         public ActionResult<IEnumerable<UserSendDTO>?> SearchAllUsersByString(string user)
         {
             var token = Request.Headers["Authorization"];
-            var loggedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
                 return BadRequest(new { result = "no_user" });
@@ -73,7 +78,8 @@ namespace pastebook_db.Controllers
         public ActionResult<int> GetFriendRequestCount() 
         {
             var token = Request.Headers["Authorization"];
-            var loggedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
                 return BadRequest(new { result = "no_user"});
@@ -87,7 +93,8 @@ namespace pastebook_db.Controllers
         public ActionResult<int> GetNotificationCount()
         {
             var token = Request.Headers["Authorization"];
-            var loggedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
                 return BadRequest(new { result = "no_user"});

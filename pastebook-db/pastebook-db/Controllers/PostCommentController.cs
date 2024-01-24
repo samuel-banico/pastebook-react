@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using pastebook_db.Data;
 using pastebook_db.Database;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -15,13 +16,15 @@ namespace pastebook_db.Controllers
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
         private readonly PostRepository _postRepository;
+        private readonly TokenController _tokenController;
 
-        public PostCommentController(PostCommentRepository postCommentRepository, NotificationRepository notificationRepository, UserRepository userRepository, PostRepository postRepository)
+        public PostCommentController(PostCommentRepository postCommentRepository, NotificationRepository notificationRepository, UserRepository userRepository, PostRepository postRepository, TokenController tokenController)
         {
             _postCommentRepository = postCommentRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _postRepository = postRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
@@ -50,7 +53,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Post> CommentPost(PostCommentDTO post)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

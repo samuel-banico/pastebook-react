@@ -3,6 +3,7 @@ using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
 using pastebook_db.Services.PasswordHash;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -13,12 +14,14 @@ namespace pastebook_db.Controllers
         private readonly UserRepository _userRepository;
         private readonly IPasswordHash _passwordHasher;
         private readonly FriendRepository _friendRepository;
+        private readonly TokenController _tokenController;
 
-        public UserController(UserRepository userRepository, IPasswordHash passwordHasher, FriendRepository friendRepository)
+        public UserController(UserRepository userRepository, IPasswordHash passwordHasher, FriendRepository friendRepository, TokenController tokenController)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _friendRepository = friendRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
@@ -57,7 +60,8 @@ namespace pastebook_db.Controllers
         public ActionResult<UserSendDTO> GetUserByToken() 
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -71,7 +75,8 @@ namespace pastebook_db.Controllers
         public ActionResult<UserSendDTO> GetUserByTokenHome()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -85,7 +90,8 @@ namespace pastebook_db.Controllers
         public ActionResult<bool> GetUserPasswordById(string password)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "user_not_found" });
@@ -101,7 +107,8 @@ namespace pastebook_db.Controllers
         public ActionResult<byte[]> GetUsersprofilePic() 
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -113,7 +120,8 @@ namespace pastebook_db.Controllers
         public ActionResult<User> EditUserGeneral([FromBody] EditUserReceiveGeneralDTO user)
         {
             var token = Request.Headers["Authorization"];
-            var retreivedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var retreivedUser = _userRepository.GetUserById(userId);
 
             if (retreivedUser == null)
                 return BadRequest(new { result = "user_not_found" });
@@ -136,7 +144,9 @@ namespace pastebook_db.Controllers
         public ActionResult<User> EditUserSecurity([FromBody] EditUserReceiveSecurityDTO user)
         {
             var token = Request.Headers["Authorization"];
-            var retreivedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var retreivedUser = _userRepository.GetUserById(userId);
+
             if (retreivedUser == null)
                 return BadRequest(new { result = "user_not_found" });
 
@@ -162,7 +172,9 @@ namespace pastebook_db.Controllers
         public ActionResult<User> EditUserProfile(IFormFile image)
         {
             var token = Request.Headers["Authorization"];
-            var retreivedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var retreivedUser = _userRepository.GetUserById(userId);
+
             if (retreivedUser == null)
                 return BadRequest(new { result = "user_not_found" });
 
@@ -180,7 +192,8 @@ namespace pastebook_db.Controllers
         public ActionResult<User> EditUserProfileBio(EditUserBioDTO userBio)
         {
             var token = Request.Headers["Authorization"];
-            var retreivedUser = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var retreivedUser = _userRepository.GetUserById(userId);
 
             if (retreivedUser == null)
                 return BadRequest(new { result = "user_not_found" });

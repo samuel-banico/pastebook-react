@@ -10,7 +10,7 @@ import { InputValidation, InputEmpty } from './RegisterValidation'
 
 import HR from '../others/HR'
 
-import { login } from './RegisterService';
+import { login, validateToken } from './RegisterService';
 
 
 const Login = ({navigation, fetchData}) => {
@@ -19,8 +19,13 @@ const Login = ({navigation, fetchData}) => {
       const getToken = async() => {
         const val = await getTokenData();
 
-        if(val)
-          navigation.navigate('Home')
+        if(val) {
+          const isValid = await validateToken(val)
+            .then(response => {
+              if(response.data)
+                navigation.navigate('Home')
+            })
+        }
       }
 
       getToken()
@@ -151,13 +156,16 @@ const Login = ({navigation, fetchData}) => {
     emptyInputOnBlur(['email'])
   }
 
+  const setToken = async(value) => {
+    await setTokenData(value);
+  }
+
   const checkCredentials = async (user) => {
     fetchData(true)
     const result = await login(user)
     .then(response => {
-      console.log(response)
-      resetPage();
-
+      setToken(response.data);
+      navigation.navigate('Home');
     })
     .catch(error => {
       fetchData(false)

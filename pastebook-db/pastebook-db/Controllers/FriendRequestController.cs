@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -14,20 +16,23 @@ namespace pastebook_db.Controllers
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
         private readonly FriendRepository _friendRepository;
+        private readonly TokenController _tokenController;
 
-        public FriendRequestController(FriendRequestRepository friendRequestRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository)
+        public FriendRequestController(FriendRequestRepository friendRequestRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository, TokenController tokenController)
         {
             _friendRequestRepository = friendRequestRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _friendRepository = friendRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet("sentRequest")]
         public ActionResult<Friend> HasSendFriendRequest()
         {
             var userReq = Request.Query["userToken"];
-            var user = _userRepository.GetUserByToken(userReq);
+            var userId = _tokenController.DecodeJwtToken(userReq);
+            var user = _userRepository.GetUserById(userId);
 
             var friendReq = Request.Query["friendId"];
             var friendId = Guid.Parse(friendReq);
@@ -45,7 +50,8 @@ namespace pastebook_db.Controllers
         public ActionResult<FriendRequest> GetAllFriendRequestsByUserId()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -69,7 +75,8 @@ namespace pastebook_db.Controllers
         public ActionResult<FriendRequest> FriendRequest(Guid Id)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

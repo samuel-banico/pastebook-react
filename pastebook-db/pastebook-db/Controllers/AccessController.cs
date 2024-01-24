@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
@@ -59,17 +60,10 @@ namespace pastebook_db.Controllers
 
                 var createdtoken = _tokenController.Authenticate(user);
 
-                var userLoginResponse = new UserLoginResponse
-                {
-                    email = user.Email,
-                    id = user.Id,
-                    token = createdtoken
-                };
-
                 user.IsCurrentlyActive = true;
                 _userRepository.UpdateUser(user, false);
 
-                return Ok(userLoginResponse);
+                return Ok(createdtoken);
             }
             catch (Exception ex)
             {
@@ -113,7 +107,8 @@ namespace pastebook_db.Controllers
         public IActionResult Watch() 
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -136,12 +131,13 @@ namespace pastebook_db.Controllers
         public IActionResult Logout()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            if (userId == null)
+                return Unauthorized(new { result = "invalid_token" });
 
+            var user = _userRepository.GetUserById(userId);
             if (user == null)
                 return BadRequest(new { result = "no_user" });
-
-            _tokenController.DeleteAll(user.Id);
 
             user.IsCurrentlyActive = false;
             _userRepository.UpdateUser(user, false);

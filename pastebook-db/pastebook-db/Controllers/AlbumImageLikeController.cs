@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -14,21 +15,24 @@ namespace pastebook_db.Controllers
         private readonly AlbumRepository _albumRepository;
         private readonly AlbumImageRepository _albumImageRepository;
         private readonly UserRepository _userRepository;
+        private readonly TokenController _tokenController;
 
-        public AlbumImageLikeController(AlbumImageLikeRepository albumImageLikeRepository, NotificationRepository notificationRepository, UserRepository userRepository, AlbumRepository albumRepository, AlbumImageRepository albumImageRepository)
+        public AlbumImageLikeController(AlbumImageLikeRepository albumImageLikeRepository, NotificationRepository notificationRepository, UserRepository userRepository, AlbumRepository albumRepository, AlbumImageRepository albumImageRepository, TokenController tokenController)
         {
             _albumImageLikeRepository = albumImageLikeRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _albumRepository = albumRepository;
             _albumImageRepository = albumImageRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
         public ActionResult<Post> GetAlbumLikeById(Guid id)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -49,7 +53,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Post> LikedAlbumImage(AlbumImageLikeDTO albumImageLike)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -75,7 +80,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Post> UnlikedAlbumImage()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

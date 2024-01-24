@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -13,20 +14,23 @@ namespace pastebook_db.Controllers
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
         private readonly PostRepository _postRepository;
+        private readonly TokenController _tokenController;
 
-        public PostLikeController(PostLikeRepository postLikeRepository, NotificationRepository notificationRepository, UserRepository userRepository, PostRepository postRepository)
+        public PostLikeController(PostLikeRepository postLikeRepository, NotificationRepository notificationRepository, UserRepository userRepository, PostRepository postRepository, TokenController tokenController)
         {
             _postLikeRepository = postLikeRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _postRepository = postRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
         public ActionResult<Post> GetPostLikeById(Guid id) 
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -47,7 +51,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Post> LikedPost(PostLikeDTO like)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -73,7 +78,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Post> UnlikedPost()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

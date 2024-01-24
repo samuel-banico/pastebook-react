@@ -4,6 +4,7 @@ using Microsoft.Extensions.FileProviders;
 using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -13,18 +14,21 @@ namespace pastebook_db.Controllers
     {
         private readonly AlbumImageRepository _albumImageRepository;
         private readonly UserRepository _userRepository;
+        private readonly TokenController _tokenController;
 
-        public AlbumImageController(AlbumImageRepository albumImageRepository, UserRepository userRepository)
+        public AlbumImageController(AlbumImageRepository albumImageRepository, UserRepository userRepository, TokenController tokenController)
         {
             _albumImageRepository = albumImageRepository;
             _userRepository = userRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
         public ActionResult<AlbumImage> GetAlbumImageById(Guid id)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

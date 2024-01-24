@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -11,11 +12,13 @@ namespace pastebook_db.Controllers
     {
         private readonly NotificationRepository _repo;
         private readonly UserRepository _userRepository;
+        private readonly TokenController _tokenController;
 
-        public NotificationController(NotificationRepository repo, UserRepository userRepository)
+        public NotificationController(NotificationRepository repo, UserRepository userRepository, TokenController tokenController)
         {
             _repo = repo;
             _userRepository = userRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet("unseenNotification")]
@@ -23,7 +26,8 @@ namespace pastebook_db.Controllers
         {
             //Added for Notif Connection
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -47,7 +51,8 @@ namespace pastebook_db.Controllers
         {
             //Added for Notif Connection
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -79,7 +84,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Notification> ClearNotification()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

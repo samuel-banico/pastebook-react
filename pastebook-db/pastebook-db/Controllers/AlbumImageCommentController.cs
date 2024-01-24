@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -14,14 +15,16 @@ namespace pastebook_db.Controllers
         private readonly UserRepository _userRepository;
         private readonly AlbumImageRepository _albumImageRepository;
         private readonly AlbumRepository _albumRepository;
+        private readonly TokenController _tokenController;
 
-        public AlbumImageCommentController(AlbumImageCommentRepository albumImageCommentRepository, NotificationRepository notificationRepository, UserRepository userRepository, AlbumImageRepository albumImageRepository, AlbumRepository albumRepository)
+        public AlbumImageCommentController(AlbumImageCommentRepository albumImageCommentRepository, NotificationRepository notificationRepository, UserRepository userRepository, AlbumImageRepository albumImageRepository, AlbumRepository albumRepository, TokenController tokenController)
         {
             _albumImageCommentRepository = albumImageCommentRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _albumImageRepository = albumImageRepository;
             _albumRepository = albumRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet]
@@ -50,7 +53,8 @@ namespace pastebook_db.Controllers
         public ActionResult<AlbumImageComment> CommentAlbumImage(AlbumImageCommentDTO albumImageComment)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });

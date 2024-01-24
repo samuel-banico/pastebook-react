@@ -20,8 +20,11 @@ namespace pastebook_db.Data
             _context = context;
         }
 
-        public User? GetUserById(Guid id)
+        public User? GetUserById(Guid? id)
         {
+            if (id == null)
+                return null;
+
             return _context.Users
                 .Include(x => x.FriendList)
                 .FirstOrDefault(x => x.Id == id);
@@ -32,19 +35,6 @@ namespace pastebook_db.Data
             return _context.Users
                 .Include(x => x.FriendList)
                 .FirstOrDefault(f => f.Email == email);
-        }
-
-        public User? GetUserByToken(string token) 
-        {
-            var userId = _context.Tokens
-                .FirstOrDefault(t => t.Token == token);
-
-            if (userId == null)
-                return null;
-
-            return _context.Users
-                .Include(x => x.FriendList)
-                .FirstOrDefault(u => u.Id == userId.UserId);
         }
 
         public List<User> GetAllUsers() 

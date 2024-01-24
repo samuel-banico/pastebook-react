@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using pastebook_db.Data;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -13,12 +14,14 @@ namespace pastebook_db.Controllers
         private readonly AlbumRepository _albumRepository;
         private readonly AlbumImageRepository _albumImageRepository;
         private readonly UserRepository _userRepository;
+        private readonly TokenController _tokenController;
 
-        public AlbumController(AlbumRepository repo, AlbumImageRepository albumImageRepository, UserRepository userRepository)
+        public AlbumController(AlbumRepository repo, AlbumImageRepository albumImageRepository, UserRepository userRepository, TokenController tokenController)
         {
             _albumRepository = repo;
             _albumImageRepository = albumImageRepository;
             _userRepository = userRepository;
+            _tokenController = tokenController;
         }
 
         // --- GET
@@ -26,7 +29,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Album> GetAlbumById(Guid albumId) 
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -45,7 +49,8 @@ namespace pastebook_db.Controllers
         public ActionResult<List<AlbumDTO>> GetAllAlbumsByOwner()
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user" });
@@ -69,7 +74,8 @@ namespace pastebook_db.Controllers
         public ActionResult<List<AlbumDTO>> GetAllAlbumsOfOthers(Guid retrievedUserId)
         {
             var token = Request.Headers["Authorization"];
-            var loggedUserId = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var loggedUserId = _userRepository.GetUserById(userId);
 
             if (loggedUserId == null)
                 return BadRequest(new { result = "no_user" });
@@ -96,7 +102,8 @@ namespace pastebook_db.Controllers
         public ActionResult<Album> CreateAlbum(AlbumDTO album)
         {
             var token = Request.Headers["Authorization"];
-            var user = _userRepository.GetUserByToken(token);
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
 
             if (user == null)
                 return BadRequest(new { result = "no_user"});

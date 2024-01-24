@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NuGet.Common;
 using pastebook_db.Data;
 using pastebook_db.Models;
+using pastebook_db.Services.Token.TokenData;
 
 namespace pastebook_db.Controllers
 {
@@ -12,20 +14,23 @@ namespace pastebook_db.Controllers
         private readonly FriendRequestRepository _friendRequestRepository;
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
+        private readonly TokenController _tokenController;
 
-        public FriendController(FriendRepository repo, NotificationRepository notificationRepository, FriendRequestRepository friendRequestRepository, UserRepository userRepository)
+        public FriendController(FriendRepository repo, NotificationRepository notificationRepository, FriendRequestRepository friendRequestRepository, UserRepository userRepository, TokenController tokenController)
         {
             _friendRepository = repo;
             _notificationRepository = notificationRepository;
             _friendRequestRepository = friendRequestRepository;
             _userRepository = userRepository;
+            _tokenController = tokenController;
         }
 
         [HttpGet("friend")]
         public ActionResult<Friend> IsFriends() 
         {
             var userReq = Request.Query["userToken"];
-            var user = _userRepository.GetUserByToken(userReq);
+            var userId = _tokenController.DecodeJwtToken(userReq);
+            var user = _userRepository.GetUserById(userId);
 
             var friendReq = Request.Query["friendId"];
             var friendId = Guid.Parse(friendReq);
@@ -69,7 +74,9 @@ namespace pastebook_db.Controllers
             else if (use == "token")
             {
                 var token = Request.Query["userId"];
-                var user = _userRepository.GetUserByToken(token);
+                var userId = _tokenController.DecodeJwtToken(token);
+                var user = _userRepository.GetUserById(userId);
+
                 userFriend = _friendRepository.GetAllUserFriends(user.Id);
             }
             else
