@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using pastebook_db.Models;
+using Microsoft.EntityFrameworkCore;
 using pastebook_db.Database;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
@@ -65,6 +66,30 @@ namespace pastebook_db.Data
             }
 
             return friendUserList;
+        }
+
+        public List<User> GetAllOnlineFriends(User user) 
+        {
+            if (user.FriendList == null)
+                return new List<User>();
+
+            var friendList = new List<User>();
+
+            Guid? friendId;
+            foreach (var friend in user.FriendList)
+            {
+                if (friend.UserId != user.Id)
+                    friendId = friend.UserId;
+                else
+                    friendId = friend.User_FriendId;
+
+                var foundFriend = _context.Users.Find(friendId);
+
+                if(foundFriend.IsCurrentlyActive)
+                    friendList.Add(foundFriend);
+            }
+
+            return friendList;
         }
 
         public List<Friend> GetAllBlockedFriends(Guid userId)

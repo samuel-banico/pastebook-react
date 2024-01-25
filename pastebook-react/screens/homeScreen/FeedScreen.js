@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StyleSheet, TouchableWithoutFeedback, ScrollView } from 'react-native'
-import React from 'react'
+import React, {useEffect} from 'react'
 
 import Post from '../../component/home/Post'
 import Feed from '../../component/home/Feed'
@@ -7,13 +7,14 @@ import FriendsOnline from '../../component/home/FriendsOnline'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const FeedScreen = ({navigation}) => {
+const FeedScreen = ({navigation, details}) => {
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <FriendsOnline/>
-        <Post navigation={navigation}/>
-        <Feed navigation={navigation}/>
+        <FriendsOnline online={details.onlineFriends}/>
+        <Post navigation={navigation} user={details.user}/>
+        <Feed navigation={navigation} feed={details.feed} />
       </ScrollView>
     </View>
   )

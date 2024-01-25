@@ -21,6 +21,11 @@ namespace pastebook_db.Data
                 .FirstOrDefault(r => r.UserId == userId && r.User_FriendId == friendId || r.UserId == friendId && r.User_FriendId == userId);
         }
 
+        public bool GetHasFriendRequest(Guid userId) 
+        {
+            return GetAllFriendRequest(userId).Count > 0;
+        }
+
         public List<FriendRequest> GetAllFriendRequest(Guid id)
         {
             return _context.FriendRequests

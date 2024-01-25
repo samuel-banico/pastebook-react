@@ -4,7 +4,6 @@ import React, {useState, useRef} from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
-
 import Entypo from '@expo/vector-icons/Entypo'
 
 import globalStyle from '../../assets/styles/globalStyle'

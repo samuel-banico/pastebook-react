@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using NuGet.Packaging;
 using pastebook_db.Database;
+using pastebook_db.DTO;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
 
@@ -123,12 +124,12 @@ namespace pastebook_db.Data
                 .ToList();
         }
 
-        public List<Post>? GetAllPrivatePostOfFriends(Guid userId) 
+        public List<Post> GetAllPrivatePostOfFriends(Guid userId) 
         {
             var friendList = _friendRepository.GetAllUserFriends(userId);
 
             if (friendList == null)
-                return null;
+                return new List<Post>();
 
             List<Post> posts = new();
 
@@ -141,7 +142,7 @@ namespace pastebook_db.Data
         }
 
         //Get all post friend Id
-        public List<Post>? GetAllPublicPostOfFriends(Guid userId)
+        public List<Post> GetAllPublicPostOfFriends(Guid userId)
         {
             var friendList = _friendRepository.GetAllUserFriends(userId);
 
@@ -158,7 +159,7 @@ namespace pastebook_db.Data
             return posts;
         }
 
-        public List<Post>? GetAllPublicPosts() 
+        public List<Post> GetAllPublicPosts() 
         {
             try
             {

@@ -32,6 +32,11 @@ namespace pastebook_db.Data
             return notif;
         }
 
+        public bool GetHasNotification(Guid userId) 
+        {
+            return GetUnseenNotifications(userId).Count > 0;
+        }
+
         // Get Unseen Notification
         public List<Notification> GetUnseenNotifications(Guid userId) 
         {

@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-const IconNavbar = ({page, currPage}) => {
+const IconNavbar = ({page, currPage, notifs}) => {
 
   return (
     <View style={styles.iconsContainer}>
@@ -13,16 +13,26 @@ const IconNavbar = ({page, currPage}) => {
               currPage === 'Home' ? <Ionicons name='home' size={25}/> : <Ionicons name='home-outline' size={25}/>
             }
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => page('FriendRequest')}>
+          <View>
+            <TouchableOpacity onPress={() => page('FriendRequest')}>
+              {
+                currPage === 'FriendRequest' ? <Ionicons name='person-add' size={25}/> : <Ionicons name='person-add-outline' size={25}/>
+              }
+            </TouchableOpacity>
             {
-              currPage === 'FriendRequest' ? <Ionicons name='person-add' size={25}/> : <Ionicons name='person-add-outline' size={25}/>
+              notifs.hasFriendRequest && <Image style={styles.img} source={require('../../assets/img/indication.png')} />
             }
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => page('Notification')}>
+          </View>
+          <View>
+            <TouchableOpacity onPress={() => page('Notification')}>
+              {
+                currPage === 'Notification' ? <Ionicons name='notifications' size={25}/> : <Ionicons name='notifications-outline' size={25}/>
+              }
+            </TouchableOpacity>
             {
-              currPage === 'Notification' ? <Ionicons name='notifications' size={25}/> : <Ionicons name='notifications-outline' size={25}/>
+              notifs.hasNotification && <Image style={styles.img} source={require('../../assets/img/indication.png')} />
             }
-          </TouchableOpacity>
+          </View>
         </View>
   )
 }
@@ -36,4 +46,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
         paddingVertical: 5
       },
+
+    img : {
+      width: 10,
+      height: 10,
+      position: 'absolute',
+      left: 20
+    }
 })

@@ -17,11 +17,10 @@ export const login = async(data) => {
 }
 
 export const validateToken = async(data) => {
-  const headerString = `${data}`
   return await axios.get(accessURL + '/validateToken', 
     {
       headers: {
-        Authorization: headerString
+        Authorization: data
       }
   })
 }

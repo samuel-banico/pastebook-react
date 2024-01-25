@@ -13,7 +13,7 @@ import HR from '../others/HR'
 import { login, validateToken } from './RegisterService';
 
 
-const Login = ({navigation, fetchData}) => {
+const Login = ({navigation, fetchData, disableLoading}) => {
 
   useEffect(() => {
       const getToken = async() => {
@@ -22,8 +22,9 @@ const Login = ({navigation, fetchData}) => {
         if(val) {
           const isValid = await validateToken(val)
             .then(response => {
-              if(response.data)
+              if(response.data) {
                 navigation.navigate('Home')
+              }
             })
         }
       }

@@ -3,21 +3,31 @@ import React from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const Post = ({navigation}) => {
-  return (
-    <View style={[globalStyle.colorBackground, styles.container]}>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <Image 
-                source={require('../../assets/img/user.png')}
-                style={styles.img}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.textContainer}
-            onPress={() => navigation.navigate('Create Post')}>
-            <Text>What's on your mind?</Text>
-        </TouchableOpacity>
-    </View>
-  )
+const Post = ({navigation, user}) => {
+
+    const createYourPost = () => {
+        const userToPass = {
+            user: user,
+            friend: null
+        }
+
+        navigation.navigate('Create Post', { data: userToPass})
+    }
+
+    return (
+        <View style={[globalStyle.colorBackground, styles.container]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Image 
+                    source={{ uri: user.profilePicture }}
+                    style={styles.img}
+                />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.textContainer}
+                onPress={() => createYourPost()}>
+                <Text>What's on your mind?</Text>
+            </TouchableOpacity>
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({

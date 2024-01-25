@@ -3,15 +3,15 @@ import React from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const YourProfile = ({navigation}) => {
+const YourProfile = ({navigation, data}) => {
   return (
     <View>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={[globalStyle.alignToColumn, styles.container]}>
             <Image
             style={styles.img} 
-            source={require('../../assets/img/user.png')}/>
+            source={{uri: data.profilePicture}}/>
             <View>
-                <Text>FirstName LastName</Text>
+                <Text>{data.fullname}</Text>
                 <Text>See your profile</Text>
             </View>
         </TouchableOpacity>

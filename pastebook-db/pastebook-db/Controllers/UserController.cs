@@ -86,8 +86,8 @@ namespace pastebook_db.Controllers
             return Ok(userDTO);
         }
 
-        [HttpGet("getPassword")]
-        public ActionResult<bool> GetUserPasswordById(string password)
+        [HttpPost("getPassword")]
+        public ActionResult<bool> GetUserPasswordById(UserConfirmPassword password)
         {
             var token = Request.Headers["Authorization"];
             var userId = _tokenController.DecodeJwtToken(token);
@@ -96,7 +96,7 @@ namespace pastebook_db.Controllers
             if (user == null)
                 return BadRequest(new { result = "user_not_found" });
 
-            if (!_passwordHasher.VerifyPassword($"{password}_{user.Salt}", user.Password))
+            if (!_passwordHasher.VerifyPassword($"{password.Password}_{user.Salt}", user.Password))
                 return Unauthorized(new { result = "password_incorrect" });
 
             return Ok(true);

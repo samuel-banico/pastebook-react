@@ -22,6 +22,11 @@ namespace pastebook_db.Models
         public ICollection<Friend>? FriendList { get; set; }
     }
 
+    public class UserConfirmPassword 
+    {
+        public string Password { get; set; } = null!;
+    }
+
     public class UserReceiveDTO
     {
         public Guid? Id { get; set; }
@@ -94,5 +99,10 @@ namespace pastebook_db.Models
         public Guid? id { get; set; }
         public string? token { get; set; }
         public string? email { get; set; }
+    }
+
+    public class UserSearch 
+    {
+        public string Username { get; set; } = null!;
     }
 }

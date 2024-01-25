@@ -1,5 +1,6 @@
 import { Button, SafeAreaView, StyleSheet, Text, View, Switch } from 'react-native'
 import React, { useState } from 'react'
+import { useRoute } from '@react-navigation/native';
 
 import Collapsible from 'react-native-collapsible';
 
@@ -10,12 +11,10 @@ import HR from '../others/HR'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-
-const Settings = ({navigation}) => {
+const Settings = ({navigation, data}) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
 
     const toggleCollapse = () => {
-
         setIsCollapsed(!isCollapsed);
     }
     
@@ -37,7 +36,7 @@ const Settings = ({navigation}) => {
         <SafeAreaView style={[globalStyle.colorBackground, styles.container]}>
             <View>
                 <View>
-                    <YourProfile navigation={navigation}/>
+                    <YourProfile navigation={navigation} data={data}/>
                 </View>
                 <Button title='click' onPress={toggleCollapse}/>
                 

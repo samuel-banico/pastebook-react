@@ -25,6 +25,7 @@ namespace pastebook_db.Data
             if (id == null)
                 return null;
 
+            
             return _context.Users
                 .Include(x => x.FriendList)
                 .FirstOrDefault(x => x.Id == id);

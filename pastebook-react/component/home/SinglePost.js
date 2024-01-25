@@ -6,61 +6,76 @@ import EvilIcons from '@expo/vector-icons/EvilIcons'
 
 import HR from '../others/HR'
 
-const SinglePost = ({navigation}) => {
+const SinglePost = ({navigation, key, item}) => {
 
     const [like, setLike] = useState(false)
 
     const toggleLike = () => setLike(!like)
-  return (
-    <View style={[globalStyle.colorBackground, styles.container]}>
-        <View style={[globalStyle.alignToColumn, {alignItems: 'center'}]}>
-            <Image 
-                style={styles.img} 
-                source={require('../../assets/img/user.png')}/>
-            <View style={{paddingLeft: 10}}>
-                <Text>FirstName LastName</Text>
-                <View style={globalStyle.alignToColumn}>
-                    <Text>Time▫️🌐/🫂</Text>
+    return (
+        <View style={[globalStyle.colorBackground, styles.container]}>
+            <View style={[globalStyle.alignToColumn, {alignItems: 'center'}]}>
+                <Image 
+                    style={styles.img} 
+                    source={{uri : item.user.profilePicture}}/>
+                <View style={{paddingLeft: 10}}>
+                    <Text>{item.user.fullname}</Text>
+                    {
+                        item.friend && 
+                        <Text>by {item.friend.fullname}</Text>
+                    }
+                    <View style={globalStyle.alignToColumn}>
+                        <Text>{item.createdOn}▫️</Text>
+                        <Text>
+                            {
+                                item.isPublic ? '🌐' : '🫂' 
+                            }
+                        </Text>
+                    </View>
                 </View>
             </View>
-        </View>
 
-        <Text style={{flex: 1, paddingVertical: 6}}>
-            POST 2000 characters
-        </Text>
+            <Text style={{flex: 1, paddingVertical: 6}}>
+                {item.content}
+            </Text>
 
-        <View style={[globalStyle.alignToColumn, {justifyContent: 'space-between'}]}>
-            <TouchableOpacity onPress={() => navigation.navigate('Post', {data:'like'})}>
-                <Text>❤️ #Like</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Post', {data:'comment'})}>
-                <Text># Comments</Text>
-            </TouchableOpacity>
-        </View>
-
-        <HR/>
-
-        <View style={[globalStyle.alignToColumn, {alignItems: 'center', justifyContent: 'space-evenly'}]}>
-            <TouchableOpacity  onPress={toggleLike}>
+            <View style={[globalStyle.alignToColumn, {justifyContent: 'space-between'}]}>
                 {
-                    like ? 
-                        <View style={globalStyle.alignToColumn}>
-                            <Text style={{fontSize: 15}}>❤️</Text>
-                            <Text style={{paddingTop: 2}}> Like</Text>
-                        </View> : 
-                        <View style={globalStyle.alignToColumn}>
-                            <EvilIcons name='heart' size={25}/>
-                            <Text style={{paddingTop: 2}}>Like</Text>
-                        </View>
+                    item.likeCount > 0 ?
+                    <TouchableOpacity onPress={() => navigation.navigate('Post', {data:'like'})}>
+                        <Text>❤️ {item.likeCount}</Text>
+                    </TouchableOpacity> : null
                 }
-                
-            </TouchableOpacity>
-            <TouchableOpacity style={globalStyle.alignToColumn} onPress={() => navigation.navigate('Post', {data:'focus'})}>
-                <EvilIcons name='comment' size={25}/>
-                <Text style={{paddingTop: 2}}>Comment</Text>
-            </TouchableOpacity>
+                {
+                    item.commentCount > 0 ?
+                    <TouchableOpacity onPress={() => navigation.navigate('Post', {data:'comment'})}>
+                        <Text>{item.commentCount} Comments</Text>
+                    </TouchableOpacity> : null
+                }
+            </View>
+
+            <HR/>
+
+            <View style={[globalStyle.alignToColumn, {alignItems: 'center', justifyContent: 'space-evenly'}]}>
+                <TouchableOpacity  onPress={toggleLike}>
+                    {
+                        like ? 
+                            <View style={globalStyle.alignToColumn}>
+                                <Text style={{fontSize: 15}}>❤️</Text>
+                                <Text style={{paddingTop: 2}}> Like</Text>
+                            </View> : 
+                            <View style={globalStyle.alignToColumn}>
+                                <EvilIcons name='heart' size={25}/>
+                                <Text style={{paddingTop: 2}}>Like</Text>
+                            </View>
+                    }
+                    
+                </TouchableOpacity>
+                <TouchableOpacity style={globalStyle.alignToColumn} onPress={() => navigation.navigate('Post', {data:'focus'})}>
+                    <EvilIcons name='comment' size={25}/>
+                    <Text style={{paddingTop: 2}}>Comment</Text>
+                </TouchableOpacity>
+            </View>
         </View>
-    </View>
   )
 }
 

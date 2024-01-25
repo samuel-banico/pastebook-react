@@ -9,6 +9,12 @@ import Modal from 'react-native-modal'
 import Loading from '../component/others/Loading';
 
 const LoginScreen = ({navigation}) => {
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false)
+
+  const disableLoadingScreen = (value) => {
+    setShowLoadingScreen(value);
+  }
+
   const [isLoading, setIsLoading] = useState(false);
 
   const showLoading = (value) => {
@@ -17,10 +23,16 @@ const LoginScreen = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Login navigation={navigation} fetchData={showLoading}/>
-      <Modal isVisible={isLoading}>
-        <Loading />
-      </Modal>
+      {
+        showLoadingScreen ? <LoadingScreen/> : 
+        <View>
+          <Login navigation={navigation} fetchData={showLoading} disableLoading={disableLoadingScreen}/>
+          <Modal isVisible={isLoading}>
+            <Loading />
+          </Modal>
+        </View>
+      }
+      
     </SafeAreaView>
     
   )

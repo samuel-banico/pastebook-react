@@ -18,7 +18,7 @@ const ProfileScreen = ({navigation}) => {
 
   function navigate(page) {
     setProfileNavigation(page);
-}
+  }
 
   return (
     <SafeAreaView style={[globalStyle.colorBackground, styles.container]}>

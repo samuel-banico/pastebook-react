@@ -22,7 +22,7 @@ namespace pastebook_db.Services.Token.TokenData
             if (jsonToken == null)
                 return null;
 
-            var userIdClaim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "UserId");
+            var userIdClaim = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "id");
 
             if (userIdClaim == null)
                 return null;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pastebook_db.Data;
+using pastebook_db.DTO;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
 using pastebook_db.Services.Token.TokenData;
@@ -208,6 +209,21 @@ namespace pastebook_db.Controllers
         }
 
         public int GetHashCode(PostDTO obj)
+        {
+            // Return the hash code of the 'Id' property
+            return obj.Id.GetHashCode();
+        }
+    }
+
+    public class SimplePostComparer : IEqualityComparer<SimplePostDTO>
+    {
+        public bool Equals(SimplePostDTO x, SimplePostDTO y)
+        {
+            // Check if the 'Id' properties are equal
+            return x.Id == y.Id;
+        }
+
+        public int GetHashCode(SimplePostDTO obj)
         {
             // Return the hash code of the 'Id' property
             return obj.Id.GetHashCode();

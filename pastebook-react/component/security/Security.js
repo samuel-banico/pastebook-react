@@ -1,16 +1,73 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
+import Toast from 'react-native-toast-message'
+
+import { getUserSecurity } from './SecurityService'
+import { getTokenData } from '../others/LocalStorage'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
 import EditSecurity from './EditSecurity'
+import { InputEmpty } from '../registration/RegisterValidation'
+
 
 const Security = () => {
 
   const [showSecurity, setShowSecurity] = useState(false);
 
-  const confirmSecurity = () => {
-    setShowSecurity(!showSecurity);
+  const [passwordSecurity, setPasswordSecurity] = useState({
+    value: '',
+    message: '',
+    style: 'black'
+  });
+
+  const changeBorderSecurity = (value) => {
+    setPasswordSecurity({
+      ...passwordSecurity,
+      style: value
+    })
+  }
+
+  const changeSecurityValue = (value) => {
+    setPasswordSecurity({
+      ...passwordSecurity,
+      value: value
+    })
+  }
+
+  const showErrorToast = (text1, text2) => {
+    Toast.show({
+      type: 'error',
+      text1: text1,
+      text2: text2
+    });
+  }
+
+  const getUser = async() => {
+    const token = await getTokenData();
+    const data = {
+      password: passwordSecurity.value
+    }
+    await getUserSecurity(token, data)
+    .then(response => {
+      setShowSecurity(!showSecurity);
+    })
+    .catch(error => {
+      if(error.response && error.response.data.result === 'password_incorrect')
+        return showErrorToast('Password', 'Incorrect Password, kindly try again');
+
+      console.log(error)
+    })
+  }
+
+  const confirmClick = () => {
+    if(InputEmpty(passwordSecurity.value)) {
+      return changeBorderSecurity('red')
+    }
+
+    changeBorderSecurity('black')
+
+    getUser();
   }
 
   return (
@@ -18,10 +75,14 @@ const Security = () => {
       {
         !showSecurity && (
           <View style={[styles.confirmContainer]}>
-            <TextInput style={[styles.textContainer]} placeholder='Enter Password'/>
+            <TextInput 
+              style={[styles.textContainer, {borderColor: passwordSecurity.style}]} 
+              placeholder='Enter Password'
+              value={passwordSecurity.value}
+              onChangeText={(e) => changeSecurityValue(e)}/>
             <TouchableOpacity 
               style={[globalStyle.colorSecondaryBG, styles.buttonContainer]}
-              onPress={() => confirmSecurity()}>
+              onPress={confirmClick}>
               <Text>Confirm</Text>
             </TouchableOpacity>
           </View>

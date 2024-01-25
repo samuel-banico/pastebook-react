@@ -1,15 +1,22 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const SingleSearch = () => {
+const SingleSearch = ({navigation, item}) => {
+
+  const onPress = () => {
+    navigation.navigate('Profile', {data: item.userId} )
+  }
+
   return (
-    <View style={[globalStyle.alignToColumn, styles.container]}>
-      <Image
-      style={styles.img} 
-      source={require('../../assets/img/user.png')}/>
-      <Text>FirstName LastName</Text>
+    <View >
+      <TouchableOpacity style={[globalStyle.alignToColumn, styles.container]} onPress={onPress}>
+        <Image
+        style={styles.img} 
+        source={{uri: item.profilePicture}}/>
+        <Text>{item.fullname}</Text>
+      </TouchableOpacity>
     </View>
   )
 }

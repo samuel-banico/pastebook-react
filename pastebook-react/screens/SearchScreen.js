@@ -5,8 +5,8 @@ import Search from '../component/search/Search'
 
 const SearchScreen = ({navigation}) => {
   return (
-    <Search/>
-  )
+    <Search navigation={navigation}/>
+  ) 
 }
 
 export default SearchScreen
