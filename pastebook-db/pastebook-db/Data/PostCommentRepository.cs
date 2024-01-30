@@ -16,9 +16,21 @@ namespace pastebook_db.Data
             _friendRepository = friendRepository;
         }
 
-        public PostComment GetPostCommmentById(Guid postCommentId)
+        public List<PostComment> GetAllCommentsByPostId(Guid id)
         {
-            return _context.PostComments.FirstOrDefault(pC => pC.Id == postCommentId);
+            return _context.PostComments
+                .Include(p => p.Post)
+                .Include(u => u.User)
+                .Where(pI => pI.PostId == id)
+                .ToList();
+        }
+
+        public PostComment? GetPostCommentById(Guid postCommentId)
+        {
+            return _context.PostComments
+                .Include(p => p.Post)
+                .Include(u => u.User)
+                .FirstOrDefault(pC => pC.Id == postCommentId);
         }
 
         public List<PostComment> GetAllPostComments(Guid id) 

@@ -3,10 +3,12 @@ import React from 'react'
 
 import SinglePhoto from '../component/singlePhoto/SinglePhoto'
 
-const SinglePhotoScreen = () => {
+const SinglePhotoScreen = ({route, navigation}) => {
+  const {id} = route.params;
+
   return (
-    <View style={styles.container}>
-        <SinglePhoto/>
+    <View style={styles.container} >
+        <SinglePhoto id={id} navigation={navigation}/>
     </View>
   )
 }

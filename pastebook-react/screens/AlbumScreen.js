@@ -3,10 +3,13 @@ import React from 'react'
 
 import Album from '../component/album/Album'
 
-const AlbumScreen = ({navigation}) => {
+const AlbumScreen = ({route, navigation}) => {
+
+  const {data} = route.params
+
   return (
     <View style={styles.container}>
-      <Album navigation={navigation}/>
+      <Album navigation={navigation} id={data}/>
     </View>
   )
 }

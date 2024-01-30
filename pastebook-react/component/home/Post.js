@@ -1,32 +1,89 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const Post = ({navigation, user}) => {
+import { getTokenData } from '../others/LocalStorage'
+import { getHomeUserData } from './HomeService'
+import { getUserRelationship } from '../profile/ProfileService'
 
-    const createYourPost = () => {
-        const userToPass = {
-            user: user,
-            friend: null
+const Post = ({navigation, enableProfileTransfer, userId}) => {
+
+    const [data, setData] = useState({})
+    const [relationship, setRelationship] = useState('')
+
+    useEffect(() => {
+        const fetchData = async() => {
+            var token = await getTokenData();
+
+            await getHomeUserData(token)
+            .then(response => {
+                setData(response.data)
+                if(!userId)
+                    userId = response.data.userId
+            })
+            .catch(error => {
+                console.log('ERROR: Post initializing Logged user data')
+                console.log(error.response)
+            })
+
+            
+            await getUserRelationship(token, {id: userId})
+            .then(response => {
+                setRelationship(response.data.result)
+            })
+            .catch(error => {
+                console.log('ERROR: Post initializing user relationship')
+                console.log(error);
+            })
         }
 
-        navigation.navigate('Create Post', { data: userToPass})
+        fetchData()
+    }, [])
+
+    const tranferToProfile = () => {
+        if(enableProfileTransfer)
+            navigation.navigate('Profile', {id: data.userId})
+    }
+
+    const createYourPost = () => {
+        navigation.navigate('Create Post', { data: null})
+    }
+
+    const createPostOnFriend = () => {
+        navigation.navigate('Create Post', { data: userId})
     }
 
     return (
-        <View style={[globalStyle.colorBackground, styles.container]}>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                <Image 
-                    source={{ uri: user.profilePicture }}
-                    style={styles.img}
-                />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.textContainer}
-                onPress={() => createYourPost()}>
-                <Text>What's on your mind?</Text>
-            </TouchableOpacity>
-        </View>
+        <>
+            {
+                relationship === 'own' ?
+                <View style={[globalStyle.colorBackground, styles.container]}>
+                    <TouchableOpacity onPress={tranferToProfile}>
+                        <Image 
+                            source={{ uri: data.profilePicture }}
+                            style={styles.img}/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.textContainer}
+                        onPress={createYourPost}>
+                        <Text>What's on your mind?</Text>
+                    </TouchableOpacity>
+                </View> : 
+                relationship === 'friend'?
+                <View style={[globalStyle.colorBackground, styles.container]}>
+                    <TouchableOpacity onPress={tranferToProfile}>
+                        <Image 
+                            source={{ uri: data.profilePicture }}
+                            style={styles.img}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.textContainer}
+                        onPress={createPostOnFriend}>
+                        <Text>Write something to ...</Text>
+                    </TouchableOpacity>
+                </View> : null
+            }
+        </>
     )
 }
 
@@ -51,7 +108,8 @@ const styles = StyleSheet.create({
     },
     img: {
         width: 30,
-        height: 30
+        height: 30,
+        borderRadius: 15,
     }
 })
 

@@ -2,6 +2,8 @@ import { View, Text, SafeAreaView, TextInput, StyleSheet, Button, TouchableOpaci
 import React, { useState, useRef, useEffect } from 'react'
 
 import Toast from 'react-native-toast-message';
+import Entypo from '@expo/vector-icons/Entypo'
+
 
 import globalStyle from '../../assets/styles/globalStyle'
 
@@ -13,19 +15,19 @@ import HR from '../others/HR'
 import { login, validateToken } from './RegisterService';
 
 
-const Login = ({navigation, fetchData, disableLoading}) => {
+const Login = ({navigation, fetchData}) => {
 
   useEffect(() => {
       const getToken = async() => {
         const val = await getTokenData();
 
-        if(val) {
-          const isValid = await validateToken(val)
-            .then(response => {
-              if(response.data) {
-                navigation.navigate('Home')
-              }
-            })
+        if(val != null) {
+          await validateToken(val)
+          .then(response => {
+            if(response.data) {
+              navigation.navigate('Home')
+            }
+          })
         }
       }
 
@@ -154,8 +156,11 @@ const Login = ({navigation, fetchData, disableLoading}) => {
       text2: text2
     });
 
-    emptyInputOnBlur(['email'])
+    resetPage();
   }
+
+  const [showPassword, setShowPassword] = useState(true);
+  const togglePassword = () => setShowPassword(!showPassword);
 
   const setToken = async(value) => {
     await setTokenData(value);
@@ -235,7 +240,11 @@ const Login = ({navigation, fetchData, disableLoading}) => {
                       globalStyle.textInputBox,
                       { borderColor: input.password.style },
                     ]}
-                    onBlur={passwordEmptyOnBlur}/>
+                    onBlur={passwordEmptyOnBlur}
+                    secureTextEntry={showPassword}/>
+                    <TouchableOpacity onPress={togglePassword} style={styles.icon}>
+                      <Entypo name={showPassword ? 'eye' : 'eye-with-line'} size={25} style={styles.icon}/>
+                    </TouchableOpacity>
                 </Animated.View>
             </View>
         </View>
@@ -291,6 +300,12 @@ const styles = StyleSheet.create({
       padding: 5,
       height: 30,
       borderRadius: 5,
-    }
+    }, 
+    icon: {
+      position: 'absolute',
+      right: 5,
+      top: '50%',
+      transform: [{ translateY: -7.5 }],
+    },
   }
 )

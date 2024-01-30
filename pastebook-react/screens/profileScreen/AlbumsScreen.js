@@ -3,10 +3,10 @@ import React from 'react'
 
 import ProfileAlbum from '../../component/profile/ProfileAlbum'
 
-const AlbumsScreen = ({navigation}) => {
+const AlbumsScreen = ({navigation, userId}) => {
   return (
     <View>
-      <ProfileAlbum navigation={navigation}/>
+      <ProfileAlbum navigation={navigation} userId={userId}/>
     </View>
   )
 }

@@ -1,15 +1,38 @@
-import { Image, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 
-const SingleOnlineFriend = () => {
+import { getTokenData } from '../others/LocalStorage'
+import { getOnlineFriendById } from './HomeService'
+
+const SingleOnlineFriend = ({item, navigation}) => {
+    const [data, setData] = useState({})
+
+    useEffect(() => {
+        const fetchData = async() => {
+            var token = await getTokenData();
+
+            await getOnlineFriendById(token, {id: item})
+            .then(response => {
+                setData(response.data)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        }
+
+        fetchData();
+    }, [])
+
   return (
     <View styles={styles.container}>
-        <Image  
-            style={styles.img} 
-            source={require('../../assets/img/user.png')}/>
-        <View style={{width: 80}}>
-            <Text numberOfLines={3}>FirstName LastName</Text>
-        </View>
+        <TouchableOpacity style={{alignItems: 'center'}} onPress={() => navigation.navigate('Profile', {id: item})}>
+            <Image  
+                style={styles.img} 
+                source={{uri: data.profilePicture}}/>
+            <View style={{width: 80, alignItems: 'center'}}>
+                <Text numberOfLines={3}>{data.fullname}</Text>
+            </View>
+        </TouchableOpacity>
     </View>
   )
 }

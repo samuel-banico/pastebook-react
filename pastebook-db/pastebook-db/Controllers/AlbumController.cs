@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using pastebook_db.Data;
+using pastebook_db.DTO;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
 using pastebook_db.Services.Token.TokenData;
@@ -45,6 +46,10 @@ namespace pastebook_db.Controllers
             return Ok(albumDTO);
         }
 
+        /// <summary>
+        /// Gets all album details
+        /// </summary>
+        /// <returns>All </returns>
         [HttpGet("allAlbumByUser")]
         public ActionResult<List<AlbumDTO>> GetAllAlbumsByOwner()
         {
@@ -69,6 +74,87 @@ namespace pastebook_db.Controllers
             return Ok(userAlbums);
 
         }
+
+        [HttpPost("getAllUserAlbum")]
+        public ActionResult<List<Guid>> GetAllUserAlbum (IdReceived received)
+        {
+            var user = _userRepository.GetUserById(received.Id);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            var albums = _albumRepository.GetAllAlbumByOwner(user.Id);
+            var userAlbums = new List<Guid>();
+
+            if (albums == null)
+                return Ok(userAlbums);
+
+            foreach (var album in albums)
+            {
+                userAlbums.Add(album.Id);
+            }
+
+            return Ok(userAlbums);
+        }
+
+        [HttpPost("getAlbumById")]
+        public ActionResult<ProfileAlbumDisplayDTO> GetAlbumById(IdReceived received)
+        {
+            var album = _albumRepository.GetAlbumById(received.Id);
+
+            if (album == null) return BadRequest(new { result = "Album does not exists" });
+
+            var newAlbum = new ProfileAlbumDisplayDTO 
+            {
+                Id = album.Id,
+                albumTitle = album.AlbumName,
+            };
+
+            if (album.AlbumImageList != null && album.AlbumImageList.Count() > 0)
+            {
+                newAlbum.coverImage = HelperFunction.PictureExists(album.AlbumImageList.ToList()[0].Image, Path.Combine("wwwroot", "images", "default_album.png"));
+                newAlbum.imageCount = album.AlbumImageList.Count();
+            }
+            else 
+            {
+                newAlbum.coverImage = HelperFunction.SendImageToAngular(Path.Combine("wwwroot", "images", "default_album.png"));
+                newAlbum.imageCount = 0;
+            }
+                
+
+            return Ok(newAlbum);
+        }
+
+        [HttpPost("getAlbumDetailsById")]
+        public ActionResult<Album> GetAlbumDetailsById(IdReceived received)
+        {
+            var album = _albumRepository.GetAlbumById(received.Id);
+
+            if (album == null)
+                return BadRequest(new { result = "album_not_exists" });
+
+            var convertedAlbum = new SingleAlbumDisplay 
+            {
+                Id=album.Id,
+                AlbumName = album.AlbumName,
+                AlbumDescription = album.AlbumDescription,
+                DateCreated = album.CreatedOn.ToString("MM-dd-yyyy"),
+            };
+
+            var imageList = new List<Guid>();
+            if (album.AlbumImageList != null && album.AlbumImageList.Count > 0)
+            {
+                foreach (var image in album.AlbumImageList)
+                    imageList.Add(image.Id);
+            }
+
+            convertedAlbum.ImageCount = imageList.Count;
+            convertedAlbum.Images = imageList;
+
+            return Ok(convertedAlbum);
+        }
+
+
 
         [HttpGet("allAlbumByOther")]
         public ActionResult<List<AlbumDTO>> GetAllAlbumsOfOthers(Guid retrievedUserId)
@@ -99,7 +185,7 @@ namespace pastebook_db.Controllers
 
         // --- POST
         [HttpPost]
-        public ActionResult<Album> CreateAlbum(AlbumDTO album)
+        public ActionResult<int> CreateAlbum(AlbumDTO album)
         {
             var token = Request.Headers["Authorization"];
             var userId = _tokenController.DecodeJwtToken(token);
@@ -125,7 +211,7 @@ namespace pastebook_db.Controllers
 
             _albumRepository.CreateAlbum(newAlbum);
 
-            return Ok(newAlbum);
+            return Ok(newAlbum.Id);
         }
 
         // --- PUT
@@ -176,6 +262,29 @@ namespace pastebook_db.Controllers
 
             // Delete Image from local storage
             if (albumToDelete.AlbumImageList != null ) 
+            {
+                foreach (var image in albumToDelete.AlbumImageList)
+                {
+                    HelperFunction.RemoveImageFromLocalStorage(image.Image);
+                }
+            }
+
+            // Delete from database
+            _albumRepository.DeleteAlbum(albumToDelete);
+
+            return Ok(new { result = "album_deleted" });
+        }
+
+        [HttpPost("deleteAlbumById")]
+        public ActionResult<Album> DeleteAlbumById(IdReceived album)
+        {
+            var albumToDelete = _albumRepository.GetAlbumById(album.Id);
+
+            if (albumToDelete == null)
+                return NotFound(new { result = "album_does_not_exist" });
+
+            // Delete Image from local storage
+            if (albumToDelete.AlbumImageList != null)
             {
                 foreach (var image in albumToDelete.AlbumImageList)
                 {

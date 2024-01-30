@@ -1,70 +1,47 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { View, Text, SafeAreaView, StyleSheet, ScrollView } from 'react-native'
+import React, {useState, useEffect} from 'react'
+
+import ProfileDetails from './ProfileDetails'
+import ProfileNavigation from './ProfileNavigation'
+import ErrorScreen from '../../screens/ErrorScreen'
+
+import PostsScreen from '../../screens/profileScreen/PostsScreen'
+import AlbumsScreen from '../../screens/profileScreen/AlbumsScreen'
+import FriendsScreen from '../../screens/profileScreen/FriendsScreen'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-import HR from '../others/HR'
+const Profile = ({navigation, userId}) => {
+    const [profileNavigation, setProfileNavigation] = useState('posts');
 
-const Profile = ({navigation}) => {
-  return (
-    <View style={[styles.container]}>
-        <View style={styles.bioContainer}>
-            <Image 
-            style={styles.img} 
-            source={require('../../assets/img/user.png')}/>
-
-            <Text>Name</Text>
-            <Text>BIO</Text>
-        </View>
-
-        <HR/>
-        
-        <View style={[globalStyle.alignToColumn, styles.detailsContainer]}>
-            <View>
-                <View>
-                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Birthday: </Text>
-                    <Text>##-##-####</Text>
-                </View>
-
-                <View>
-                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Gender: </Text>
-                    <Text>-----</Text>
-                </View>
-
-                <View>
-                    <Text style={[styles.detailsText, globalStyle.colorPimaryText]}>Mobile Number: </Text>
-                    <Text>09#########</Text>
-                </View>
-            </View>
-
-            <TouchableOpacity onPress={() => navigation.navigate('Edit Profile')}>
-                <Text>✏️ Edit Profile</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-  )
+    function navigate(page) {
+      setProfileNavigation(page);
+    }
+  
+    return (
+      <View style={[globalStyle.colorBackground]}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <ProfileDetails navigation={navigation} userId={userId}/>
+  
+            <View style={{paddingTop: 6, backgroundColor: 'white'}}/>
+  
+            <ProfileNavigation page={navigate}/>
+            <View style={{flex: 1, paddingTop: 6, backgroundColor: 'white'}}/>
+            { 
+                profileNavigation == 'posts' ? <PostsScreen navigation={navigation} userId={userId}/> :
+                profileNavigation == 'friends' ? <FriendsScreen navigation={navigation} userId={userId}/> :
+                profileNavigation == 'albums' ? <AlbumsScreen navigation={navigation} userId={userId}/> :
+                <ErrorScreen/>
+            }
+          </ScrollView>
+      </View>
+    )
 }
 
 export default Profile
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 10,
-        paddingHorizontal: 15
-    },
-    bioContainer: {
-        alignItems: 'center'
-    },
-    detailsContainer: {
-        justifyContent: 'space-between'
-    },
-    img: {
-        width: 100,
-        height: 100,
-        borderRadius: 50
-    },
-    detailsText: {
-        fontSize: 14,
-        fontWeight: '600'
+      flex: 1
     }
-})
+  })

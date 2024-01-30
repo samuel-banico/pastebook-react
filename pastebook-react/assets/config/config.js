@@ -1,6 +1,6 @@
 export const config = () => {
 //   home
-// return 'http://192.168.68.148'
+return 'http://192.168.68.148'
 // Office
-    return 'http://172.26.20.186'
+    // return 'http://172.26.20.186'
 }

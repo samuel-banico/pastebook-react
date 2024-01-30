@@ -11,3 +11,20 @@ export const getUserSecurity = async (auth, data) => {
         }
     })
 }
+
+export const getUserEmailByToken = async (auth) => {
+    return await axios.get(securityURL + '/getUserEmailByToken', {
+        headers : {
+            Authorization: auth
+        }
+    })
+}
+
+export const updateUserSecurity = async (auth, data) => {
+    return await axios.post(securityURL + '/updateUserSecurity', data, {
+        headers : {
+            Authorization: auth
+        }
+    })
+}
+

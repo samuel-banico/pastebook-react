@@ -1,17 +1,37 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-const SingleFriend = () => {
-  return (
-    <View style={styles.container}>
-        <TouchableOpacity>
-            <Image 
-                source={require('../../assets/img/user.png')}
-                style={styles.img}/>
-            <Text numberOfLines={3} style={{paddingLeft: 5}}>FirstName LastName</Text>
-        </TouchableOpacity>
-    </View>
-  )
+import { getUserById } from './ProfileService'
+
+const SingleFriend = ({navigation, item}) => {
+
+    const [data, setData] = useState({})
+
+    useEffect(() => {
+        const fetchData = async() => {
+            await getUserById({id: item})
+            .then(response => {
+                setData(response.data)
+            })
+            .catch(error => {
+                console.log('ERROR: At Single Friend')
+                console.log(error)
+            })
+        }
+
+        fetchData()
+    }, [])
+
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile', {id: item})}>
+                <Image 
+                    source={{uri: data.profilePicture}}
+                    style={styles.img}/>
+                <Text numberOfLines={3} style={{paddingLeft: 5}}>{data.fullname}</Text>
+            </TouchableOpacity>
+        </View>
+    )
 }
 
 export default SingleFriend

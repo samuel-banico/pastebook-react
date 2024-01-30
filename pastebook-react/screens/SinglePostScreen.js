@@ -5,10 +5,14 @@ import globalStyle from '../assets/styles/globalStyle'
 
 import SinglePost from '../component/singlePost/SinglePost'
 
-const SinglePostScreen = () => {
+const SinglePostScreen = ({route, navigation}) => {
+  const {data} = route.params;
+  const {item} = route.params;
+
   return (
     <View style={[styles.container, globalStyle.colorBackground]}>
-      <SinglePost/>
+      
+      <SinglePost selection={data} data={item} navigation={navigation}/>
     </View>
   )
 }

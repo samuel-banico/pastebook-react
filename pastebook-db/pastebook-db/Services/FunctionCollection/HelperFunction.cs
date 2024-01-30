@@ -1,15 +1,24 @@
 ﻿using System.Net.Mail;
 using System.Net;
 using pastebook_db.Models;
+using System.IO;
 
 namespace pastebook_db.Services.FunctionCollection
 {
     public class HelperFunction
     {
-        public static string? SendImageToAngular(string? filePath)
+        public static string PictureExists(string picture, string defaultImage) 
+        {
+            if (File.Exists(picture))
+                return SendImageToAngular(picture);
+
+            return SendImageToAngular(defaultImage);
+        }
+
+        public static string SendImageToAngular(string? filePath)
         {
             if (filePath == null)
-                return null;
+                return "";
 
             byte[] imageData = System.IO.File.ReadAllBytes(filePath);
 

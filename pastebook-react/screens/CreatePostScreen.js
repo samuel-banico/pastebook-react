@@ -6,24 +6,11 @@ import CreateYourPost from '../component/createPost/CreateYourPost'
 
 const CreatePostScreen = ({navigation}) => {
   const route = useRoute();
-
-  const [userData, setUserData] = useState({
-    user: {},
-    friend: {}
-  })
-
-  useEffect(() => {
-    const {data} = route.params;
-
-    setUserData ({
-      user: data.user,
-      friend: data.friend
-    })
-  }, [])
+  const {data} = route.params;
 
   return (
     <View style={{flex: 1}}>
-      <CreateYourPost data={userData} navigation={navigation}/>
+      <CreateYourPost data={data} navigation={navigation}/>
     </View>
   )
 }

@@ -3,10 +3,10 @@ import React from 'react'
 
 import EditProfile from '../../component/editProfile/EditProfile'
 
-const EditProfileScreen = () => {
+const EditProfileScreen = ({navigation}) => {
   return (
     <View style={styles.container} >
-      <EditProfile/>
+      <EditProfile navigation={navigation}/>
     </View>
   )
 }

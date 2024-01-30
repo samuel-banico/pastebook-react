@@ -4,10 +4,10 @@ import React from 'react'
 import Header from '../../component/navbar/Header'
 import Notification from '../../component/notification/Notification'
 
-const NotificationScreen = () => {
+const NotificationScreen = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
-      <Notification/>
+      <Notification navigation={navigation}/>
     </SafeAreaView>
   )
 }

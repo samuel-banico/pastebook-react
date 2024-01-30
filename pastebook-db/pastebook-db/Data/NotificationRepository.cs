@@ -18,6 +18,18 @@ namespace pastebook_db.Data
             _friendRepository = friendRepository;
         }
 
+        public Notification? GetNotificationById(Guid notifId) 
+        {
+            var notif = _context.Notifications
+                    .Include(n => n.User)
+                    .Include(n => n.UserRequest)
+                    .Include(n => n.Post)
+                    .Include(n => n.Album)
+                    .FirstOrDefault(n => n.Id == notifId);
+
+            return notif;
+        }
+
         // Get All Notifications
         public List<Notification> GetAllNotifications(Guid userId)
         {
@@ -54,17 +66,12 @@ namespace pastebook_db.Data
 
         // Get Seen Notification
 
-        public void SeenNotification(Guid? notifId)
+        public void SeenNotification(Notification notif)
         {
-            var notif = _context.Notifications.FirstOrDefault(n => n.Id == notifId);
+            notif.HasSeen = true;
 
-            if (notif != null) 
-            {
-                notif.HasSeen = true;
-
-                _context.Entry(notif).State = EntityState.Modified;
-                _context.SaveChanges();
-            }
+            _context.Entry(notif).State = EntityState.Modified;
+            _context.SaveChanges();
         }
 
         // Clear Seen Notifs

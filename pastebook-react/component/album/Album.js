@@ -5,55 +5,111 @@ import * as ImagePicker from 'expo-image-picker';
 
 import globalStyle from '../../assets/styles/globalStyle'
 
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+
+import AwesomeAlert from 'react-native-awesome-alerts';
+
 import HR from '../others/HR'
 import SinglePhoto from './SinglePhoto'
+import { deleteAlbumById, getAlbumDetailsById } from './AlbumService';
 
-const Album = ({navigation}) => {
-  const [image, setImage] = useState(null);
+const Album = ({navigation, id}) => {
+  
+  const[loading, setLoading] = useState(true)
+  const [data, setData] = useState({});
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  useEffect(() => {
+    const fetchData = async() => {
+      await getAlbumDetailsById({id: id})
+      .then(response => {
+        setData(response.data)
+      })
+      .catch(error => {
+        console.log('ERROR: Album')
+        console.log(error)
+      })
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setLoading(false);
     }
+
+    fetchData();
+  }, [])
+
+  const [state, setState] = useState(false)
+
+  const showAlert = () => {
+    setState(true);
   };
+
+  const hideAlert = () => {
+    setState(false);
+  };
+
+  const deleteAlbum = async() => {
+    await deleteAlbumById({id: id})
+    .then(response => {
+      setState(false)
+      navigation.goBack()
+    })
+    .catch(error => {
+      console.log('ERROR: Album, deleting album')
+      console.log(error)
+    })
+  }
 
   return (
     <View style={[styles.container, globalStyle.colorBackground]}>
-      <ScrollView>
-        <View>
-          <Text>Album Name</Text>
-          <Text>Album Description</Text>
-          <Text>Date Created</Text>
-        </View>
-
-        <HR/>
-
-        <View style={[styles.photoContainer]}>
-          <View style={[globalStyle.alignToColumn, styles.photoListContainer]}>
-            <TouchableOpacity onPress={pickImage}>
-                <Image
-                    resizeMode='contain'
-                    style={styles.img}
-                    source={require('../../assets/img/add_image.png')}/>
-            </TouchableOpacity>
-            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-            <SinglePhoto navigation={navigation}/>
-            <SinglePhoto navigation={navigation}/>
-            <SinglePhoto navigation={navigation}/>
-            <SinglePhoto navigation={navigation}/>
-            <SinglePhoto navigation={navigation}/>
-            <SinglePhoto navigation={navigation}/>
-
+      {
+        loading ? null :
+        <ScrollView>
+          <View>
+            <View style={[globalStyle.alignToColumn, {justifyContent: 'space-between'}]}>
+              <Text style={globalStyle.textTitle}>{data.albumName}</Text>
+              <View style={[globalStyle.alignToColumn]}>
+                <TouchableOpacity>
+                  <FontAwesome5 name='edit' size={20}/>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={showAlert}>
+                  <MaterialIcons name='delete-forever' size={30}/>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Text>{data.albumDescription}</Text>
+            <Text style={globalStyle.textParagraph}>{data.dateCreated}</Text>
           </View>
-        </View>
-      </ScrollView>
+
+          <HR/>
+
+          <View style={[styles.photoContainer]}>
+            <View style={[styles.photosCountContainer, globalStyle.alignToColumn]}>
+              <Text>Photos▫️{data.imageCount}</Text>
+            </View>
+            <View style={[globalStyle.alignToColumn, styles.photoListContainer]}>
+              {
+                (data.images).map((item) => (
+                  <SinglePhoto key={item} item={item} navigation={navigation}/>
+                ))
+              }
+            </View>
+          </View>
+
+          <AwesomeAlert
+            show={state}
+            showProgress={false}
+            title="Delete Forever"
+            message="Are you sure you want to delete this album?"
+            closeOnTouchOutside={true}
+            closeOnHardwareBackPress={false}
+            showCancelButton={true}
+            showConfirmButton={true}
+            cancelText="No, cancel"
+            confirmText="Yes, delete it"
+            confirmButtonColor="#DD6B55"
+            onCancelPressed={hideAlert}
+            onConfirmPressed={deleteAlbum}/>
+        </ScrollView>
+      }
     </View>
   )
 }
@@ -69,6 +125,10 @@ const styles = StyleSheet.create({
   photoContainer: {
     flex: 1,
     paddingTop: 10
+  },
+  photosCountContainer: {
+    justifyContent: 'space-between', 
+    marginBottom: 10
   },
   photoListContainer: {
     flexWrap: 'wrap',

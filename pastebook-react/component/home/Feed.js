@@ -1,10 +1,32 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
 import SinglePost from './SinglePost'
-const Feed = ({navigation, feed}) => {
+
+import { getTokenData } from '../others/LocalStorage'
+import { getFeedPosts } from './HomeService'
+
+const Feed = ({navigation}) => {
+
+  const [data, setData] = useState({})
+
+  useEffect(() => {
+    const fetchData = async() => {
+      var token = await getTokenData();
+
+      await getFeedPosts(token)
+      .then(response => {
+        setData(response.data)
+      })
+      .catch(error => {
+        console.log(error);
+      })
+    }
+
+    fetchData()
+  }, [])
 
   const checkFeed = (obj) => {
     return !(obj === null || Object.keys(obj).length === 0);
@@ -13,8 +35,8 @@ const Feed = ({navigation, feed}) => {
   return (
     <View style={styles.container}>
       {
-        checkFeed(feed) ? feed.map((item) => (
-          <SinglePost key={item.id} item={item} navigation={navigation}/>
+        checkFeed(data) ? data.map((item) => (
+          <SinglePost key={item} item={item} navigation={navigation}/>
         )) : 
         <View style={styles.textContainer}>
           <Text>No Available Post</Text>

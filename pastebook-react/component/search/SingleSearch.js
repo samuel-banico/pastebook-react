@@ -6,7 +6,7 @@ import globalStyle from '../../assets/styles/globalStyle'
 const SingleSearch = ({navigation, item}) => {
 
   const onPress = () => {
-    navigation.navigate('Profile', {data: item.userId} )
+    navigation.navigate('Profile', {id: item.userId} )
   }
 
   return (
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     img: {
         width: 50,
         height: 50,
-        borderRadius: 25
+        borderRadius: 25,
+        marginRight: 10
     }
 })

@@ -57,7 +57,7 @@ namespace pastebook_db.Controllers
 
             return Ok(userList);
         }
-        
+
         // Search Page
         [HttpPost("searchAllUsers")]
         public ActionResult<IEnumerable<UserSendDTO>?> SearchAllUsersByString(UserSearch user)
@@ -84,14 +84,14 @@ namespace pastebook_db.Controllers
         }
 
         [HttpGet("getFriendReqCount")]
-        public ActionResult<int> GetFriendRequestCount() 
+        public ActionResult<int> GetFriendRequestCount()
         {
             var token = Request.Headers["Authorization"];
             var userId = _tokenController.DecodeJwtToken(token);
             var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
-                return BadRequest(new { result = "no_user"});
+                return BadRequest(new { result = "no_user" });
 
             var friendRequestCount = _homeRepository.GetFriendRequestCount(loggedUser.Id);
 
@@ -106,15 +106,15 @@ namespace pastebook_db.Controllers
             var loggedUser = _userRepository.GetUserById(userId);
 
             if (loggedUser == null)
-                return BadRequest(new { result = "no_user"});
+                return BadRequest(new { result = "no_user" });
 
             var unseenNotifCount = _homeRepository.GetUnseenNotificationCount(loggedUser.Id);
 
             return Ok(unseenNotifCount);
         }
 
-        [HttpGet("getHomeDetails")]
-        public ActionResult<Home> GetHomeDetails()
+        [HttpGet("getNavbarRequest")]
+        public ActionResult<NavbarRequestToSend> getNavbarRequest()
         {
             var token = Request.Headers["Authorization"];
 
@@ -127,34 +127,120 @@ namespace pastebook_db.Controllers
             if (user == null)
                 return BadRequest(new { result = "no_user" });
 
-            var Home = new Home();
-
-            // get User Profile
-            Home.User = _homeRepository.GetUserHomeDTO(user);
-
-            // get Online Friends
-            List<User> onlineFriends = _friendRepository.GetAllOnlineFriends(user);
-            List<UserHomeDTO> friendList = new();
-
-            foreach (var friend in onlineFriends)
+            return Ok(new NavbarRequestToSend
             {
-                friendList.Add(_homeRepository.GetUserHomeDTO(friend));
-            }
-
-            Home.OnlineFriends = friendList;
-
-            // get Posts
-            Home.Feed = _homeRepository.GetFeed(user);
-
-            // get usernotifcation
-            Home.HasNotification = _notificationRepository.GetHasNotification(user.Id);
-
-            // get user friendrequest
-            Home.HasFriendRequest = _friendRequestRepository.GetHasFriendRequest(user.Id);
-            
-            return Ok(Home);
+                HasFriendRequest = _friendRequestRepository.GetHasFriendRequest(user.Id),
+                HasNotification = _notificationRepository.GetHasNotification(user.Id)
+            });
         }
 
-        // HELPER METHODS
+        [HttpGet("getOnlineFriends")]
+        public ActionResult<List<Guid>> GetOnlineFriends()
+        {
+            var token = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(new { result = "no_token" });
+
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            List<User> onlineFriends = _friendRepository.GetAllOnlineFriends(user);
+            List<Guid> friendList = new();
+
+            foreach (var friend in onlineFriends)
+                friendList.Add(friend.Id);
+
+            return Ok(friendList);
+        }
+
+        [HttpGet("getFeedPosts")]
+        public ActionResult<List<Guid>> GetFeedPosts()
+        {
+            var token = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(new { result = "no_token" });
+
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            var posts = _homeRepository.GetFeed(user);
+            List<Guid> postIdList = new();
+
+            foreach (var post in posts)
+                postIdList.Add(post.Id);
+
+            return Ok(postIdList);
+        }
+
+        [HttpGet("getHomeUserData")]
+        public ActionResult<UserHomeDTO> GetHomeDetails()
+        {
+            var token = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(new { result = "no_token" });
+
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            return Ok(_homeRepository.GetUserHomeDTO(user));
+        }
+
+        [HttpPost("getOnlineFriendById")]
+        public ActionResult<List<UserHomeDTO>> GetOnlineFriendById (IdReceived friendId)
+        {
+            var token = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(new { result = "no_token" });
+
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            var friend = _userRepository.GetUserById(friendId.Id);
+
+            if (friend == null)
+                return BadRequest(new { result = "not_friend" });
+
+            return Ok(_homeRepository.GetUserHomeDTO(friend));
+        }
+
+        [HttpPost("getFeedPostById")]
+        public ActionResult<List<UserHomeDTO>> GetFeedPostById(IdReceived postId)
+        {
+            var token = Request.Headers["Authorization"];
+
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(new { result = "no_token" });
+
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            var getPost = _postRepository.GetPostById(postId.Id);
+
+            if (getPost == null)
+                return BadRequest(new { result = "no_post" });
+
+            var post = _homeRepository.PostToSimpleDTO(getPost, user.Id);
+
+            return Ok(post);
+        }
     }
 }

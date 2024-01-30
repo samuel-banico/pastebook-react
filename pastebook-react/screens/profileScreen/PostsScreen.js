@@ -3,10 +3,10 @@ import React from 'react'
 
 import ProfilePost from '../../component/profile/ProfilePost'
 
-const PostsScreen = () => {
+const PostsScreen = ({navigation, userId}) => {
   return (
     <View>
-      <ProfilePost/>
+      <ProfilePost navigation={navigation} userId={userId}/>
     </View>
   )
 }

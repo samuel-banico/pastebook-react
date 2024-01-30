@@ -1,32 +1,67 @@
-import { StyleSheet, Text, Touchable, TouchableOpacity, View, Image, TextInput, ScrollView, Animated, Easing, Platform  } from 'react-native'
+import { StyleSheet, Text, Touchable, TouchableOpacity, View, Image, TextInput, ScrollView, Platform  } from 'react-native'
 import React, { useState, useRef, useEffect } from 'react'
 
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
+import Toast from 'react-native-toast-message';
 
 import globalStyle from '../../assets/styles/globalStyle'
 
+import { MobileNumberIsValid } from '../registration/RegisterValidation';
+import {getTokenData} from '../others/LocalStorage'
+import { editUserProfilePicture, getProfileUserDetailsByToken, updateProfile } from './EditProfileService';
+
 import HR from '../others/HR'
 
-const EditProfile = () => {
+const EditProfile = ({navigation}) => {
+    const [data, setData] = useState({});
+
     const [inputStates, setInputStates] = useState({
         profPic: {state: false, style: 'black'},
-        bio: {value: '', state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
-        firstName: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
-        lastName: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
-        mobileNumber: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
-        birthday: {value: '',state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
-        gender: {value: '', state: false, style:'black', shakeAnimation: useRef(new Animated.Value(0)).current},
+        bio: {value: null, state: false, style:'black'},
+        firstName: {value: null,state: false, style:'black'},
+        lastName: {value: null,state: false, style:'black'},
+        mobileNumber: {value: null,state: false, style:'black'},
+        birthday: {value: null, state: false, style:'black'},
+        gender: {value: null, state: false, style:'black'},
     })
 
+    const [showCancel, setShowCancel] = useState(false)
     const [image, setImage] = useState(null);
 
+    const [update, setUpdate] = useState(false)
+
+    const [showSave, setShowSave] = useState(false);
+    const [gender, setGender] = useState(1);
+
+    // BIRTHDAY
+    const [date, setDate] = useState(new Date());
+    const [showPicker, setShowPicker] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            var token = await getTokenData()
+
+            await getProfileUserDetailsByToken(token)
+            .then(response => {
+                setData(response.data)
+                onChangeValue('email', response.data.gender)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        }
+
+        fetchData();
+    }, [update])
+
+    
     const pickImage = async () => {
+        setShowCancel(true);
         let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
-        aspect: [4, 3],
         quality: 1,
         });
 
@@ -34,6 +69,12 @@ const EditProfile = () => {
             setImage(result.assets[0].uri);
         }
     };
+    
+    const cancelClick = () => {
+        setShowCancel(false)
+
+        setImage(null)
+    }
 
     const toggleEditButton = (inputName) => {
         setInputStates({
@@ -56,23 +97,13 @@ const EditProfile = () => {
         });
       };
 
-    const focusText = (inputName) => {
-        inputStates[inputName].ref.current.focus();
-    }
-
-    const [showSave, setShowSave] = useState(false);
-
     useEffect(() => {
         const trueState = Object.values(inputStates).some((stateObj) => stateObj.state);
 
         setShowSave(trueState)
     }, [inputStates])
 
-    const [gender, setGender] = useState('');
 
-  // BIRTHDAY
-  const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
 
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
@@ -104,7 +135,78 @@ const EditProfile = () => {
 
     month = month < 10 ? `0${month}` : month
     day = day < 10 ? `0${day}` : day
-    return `${day}-${month}-${year}`
+    return `${month}/${day}/${year}`
+  }
+
+  const showToast = (type, text1, text2) => {
+    Toast.show({
+        type: type,
+        text1: text1,
+        text2: text2
+      })
+  }
+
+  const mobileNumberOnBlur = () => {
+    if(!MobileNumberIsValid(inputStates.mobileNumber.value)) {
+        showToast('error', 'Information Error', 'Mobile Number not valid!')
+
+        return true;
+    }
+
+    return false;
+  }
+
+  const dataUpdate = async (data) => {
+    var token = await getTokenData();
+
+    await updateProfile(token, data)
+    .then(response => {
+        showToast('success', 'Success', 'Information update successfull!')
+        setUpdate(!update);
+        navigation.goBack();
+    })
+    .catch(error => {
+        console.log(error);
+        showToast('error', 'Error', 'There was an error updating your profile')
+    })
+  }
+
+  const clickOnSubmit = () => {
+    if(inputStates.mobileNumber.value != null && mobileNumberOnBlur())
+        return
+
+    var dataToSend = {
+        bio : inputStates.bio.value,
+        firstName: inputStates.firstName.value,
+        lastName: inputStates.lastName.value,
+        birthday: inputStates.birthday.value,
+        gender: inputStates.gender.value,
+        mobileNumber: inputStates.mobileNumber.value
+    }
+
+    dataUpdate(dataToSend);
+  }
+
+  const editProfileOnClick = async () => {
+    var token = await getTokenData()
+    const formData = new FormData();
+
+    formData.append('image', {
+        uri: image,
+        type: 'image/jpeg',
+        name: 'myFile.jpg'
+    });
+
+    await editUserProfilePicture(token, formData)
+    .then(response => {
+        showToast('success', 'Success', 'Profile picture updated!')
+        setUpdate(!update)
+        setShowCancel(!showCancel)
+    })
+    .catch(error => {
+        console.log('ERROR: Uploading Images')
+        console.log(error)
+    })
   }
 
   return (
@@ -114,17 +216,36 @@ const EditProfile = () => {
             <View>
                 <View style={[globalStyle.alignToColumn, styles.titleContainer]}>
                     <Text style={globalStyle.textTitle}>Profile Picture</Text>
-                    <TouchableOpacity style={styles.editContainer} onPress={pickImage}>
-                        <Text>Edit</Text>
+                    <View style={[globalStyle.alignToColumn]}>
+                        <TouchableOpacity style={styles.editContainer} onPress={pickImage}>
+                            <Text>Edit</Text>
+                        </TouchableOpacity>
+
+                        {
+                            showCancel && 
+                            <TouchableOpacity style={styles.editContainer} onPress={cancelClick}>
+                                <Text>Cancel</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                </View>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View style={[styles.outerCircleContainer, {borderColor: inputStates.profPic.style}]}>
+                        { image && showCancel ? <Image source={{ uri: image }} style={[styles.img]}/> : 
+                            <Image 
+                                style={[styles.img]} 
+                                source={{uri: data.profilePicture}}/>
+                        }
+                    </View>
+                </View>
+                {
+                    showCancel && 
+                    <TouchableOpacity 
+                        onPress={editProfileOnClick} 
+                        style={[globalStyle.colorSecondaryBG, styles.saveContainer]}>
+                        <Text>Update Profile</Text>
                     </TouchableOpacity>
-                </View>
-                <View style={[styles.imgContainer]}>
-                    { image ? <Image source={{ uri: image }} style={{ width: 200, height: 200 }}/> : 
-                    <Image 
-                        style={[styles.img, {borderColor: inputStates.profPic.style, borderWidth: 1}]} 
-                        source={require('../../assets/img/user.png')}/>}
-                        
-                </View>
+                }
             </View>
 
             <HR/>
@@ -143,9 +264,12 @@ const EditProfile = () => {
                     }
                 </View>
                 <TextInput
+                    multiline={true}
                     editable={inputStates.bio.state}
                     style={[{borderColor: inputStates.bio.style}, styles.textContainer]}
-                    placeholder='Describe yourself...'/>
+                    placeholder={data.bio}
+                    value={inputStates.bio.value}
+                    onChangeText={(e) => onChangeValue('bio', e)}/>
             </View>
             
             <HR/>
@@ -157,7 +281,7 @@ const EditProfile = () => {
                         <Text>First Name</Text>
                         {
                             !inputStates.firstName.state && (
-                                <TouchableOpacity 
+                                <TouchableOpacity   
                                     onPress={() => toggleEditButton('firstName')}
                                     style={[styles.editContainer]}>
                                     <Text>Edit</Text>
@@ -168,7 +292,9 @@ const EditProfile = () => {
                     <TextInput 
                         editable={inputStates.firstName.state} 
                         style={[{borderColor: inputStates.firstName.style}, styles.textContainer]}
-                        placeholder='FirstName'></TextInput>
+                        placeholder={data.firstName}
+                        value={inputStates.firstName.value}
+                        onChangeText={(e) => onChangeValue('firstName', e)}></TextInput>
                 </View>
                 
                 <View>
@@ -187,7 +313,9 @@ const EditProfile = () => {
                     <TextInput 
                         style={[{borderColor: inputStates.lastName.style}, styles.textContainer]}
                         editable={inputStates.lastName.state} 
-                        placeholder='LastName'></TextInput>
+                        placeholder={data.lastName}
+                        value={inputStates.lastName.value}
+                        onChangeText={(e) => onChangeValue('lastName', e)}></TextInput>
                 </View>
 
                 <View>
@@ -208,7 +336,8 @@ const EditProfile = () => {
                     editable={inputStates.mobileNumber.state}
                     value={inputStates.mobileNumber.value}
                     onChangeText={(e) => onChangeValue('mobileNumber', e)}
-                    placeholder='MobileNumber'></TextInput>
+                    placeholder={data.mobileNumber}
+                    onBlur={mobileNumberOnBlur}></TextInput>
                 </View>
 
                 <View>
@@ -239,7 +368,7 @@ const EditProfile = () => {
                             )}
                             <TouchableOpacity disabled={!inputStates.birthday.state} onPress={toggleDatePicker}>
                                 <TextInput 
-                                placeholder='1-01-1990'
+                                placeholder={data.birthday}
                                 value={inputStates.birthday.value}
                                 onChangeText={(e) => onChangeValue('birthday', e)}
                                 editable={false}/>
@@ -264,26 +393,40 @@ const EditProfile = () => {
                     </View>
                     <View>
                         <View style={[styles.textContainer, {borderColor: inputStates.gender.style}]}>
-                            <Picker
-                                enabled={inputStates.gender.state}
-                                selectedValue={gender}
-                                onValueChange={(itemValue, itemIndex) => {
-                                    setGender(itemValue)
-                                    onChangeValue('gender', itemValue)}
-                                }>
-                                <Picker.Item label="Gender" value='' enabled={false}/>
-                                <Picker.Item label="Male" value="0" />
-                                <Picker.Item label="Female" value="1"/>
-                                <Picker.Item label="Others" value="2"/>
-                            </Picker>
+                            {
+                                inputStates.gender.state ? 
+                                <Picker
+                                    selectedValue={gender}
+                                    onValueChange={(itemValue, itemIndex) => {
+                                        setGender(itemValue)
+                                        onChangeValue('gender', itemValue)}
+                                    }>
+                                    <Picker.Item label="Gender" value='' enabled={false}/>
+                                    <Picker.Item label="Male" value="0" />
+                                    <Picker.Item label="Female" value="1"/>
+                                    <Picker.Item label="Others" value="2"/>
+                                </Picker> : 
+                                <Text style={styles.genderContainer}>
+                                    {
+                                        data.gender === 0 ? 'Male' :
+                                        data.gender === 1 ? 'Female' :
+                                        data.gender === 2 ? 'Other' :
+                                        'error'
+                                    }
+                                </Text>
+                            }
                         </View>
                     </View>
                 </View>
                 
                 {
-                    showSave && (<TouchableOpacity style={[globalStyle.colorSecondaryBG, styles.saveContainer]}>
+                    showSave && (
+                    <TouchableOpacity 
+                        onPress={clickOnSubmit} 
+                        style={[globalStyle.colorSecondaryBG, styles.saveContainer]}>
                         <Text>Save Changes</Text>
-                    </TouchableOpacity>)
+                    </TouchableOpacity>
+                    )
                 }
             </View>
         </ScrollView>
@@ -299,17 +442,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10
     },
+    outerCircleContainer: {
+        width: 106,
+        height: 106,
+        borderRadius: 53,
+        padding: 2,
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
     titleContainer: {
         alignItems: 'center',
         justifyContent: 'space-between'
     },
     editContainer: {
-        alignItems: 'center'
+        paddingLeft: 3,
+        paddingRight: 3
     }, 
-    imgContainer: {
-        alignItems: 'center',
-        marginTop: 8
-    },
     textContainer: {
         borderWidth: 1,
         borderRadius: 5,
@@ -317,6 +466,9 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         marginVertical: 5,
         marginBottom: 15
+    },
+    genderContainer: {
+        marginVertical: 5,
     },
     saveContainer: {
         marginVertical: 10,

@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 
-const Header = ({navigation, data}) => {
+const Header = ({navigation}) => {
   return (
     <View style={[styles.logoContainer]}>
         <TouchableOpacity>
@@ -16,7 +16,7 @@ const Header = ({navigation, data}) => {
           <TouchableOpacity onPress={() => navigation.navigate('Search')}>
             <MaterialIcons name='search' size={25} style={styles.icon}/>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Settings', {data: data})}>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
             <MaterialIcons name='settings' size={25} style={styles.icon}/>
           </TouchableOpacity>
         </View>

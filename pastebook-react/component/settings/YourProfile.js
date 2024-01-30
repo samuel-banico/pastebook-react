@@ -6,7 +6,7 @@ import globalStyle from '../../assets/styles/globalStyle'
 const YourProfile = ({navigation, data}) => {
   return (
     <View>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={[globalStyle.alignToColumn, styles.container]}>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile', {id:data.userId})} style={[globalStyle.alignToColumn, styles.container]}>
             <Image
             style={styles.img} 
             source={{uri: data.profilePicture}}/>

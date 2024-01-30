@@ -1,13 +1,19 @@
 ﻿namespace pastebook_db.DTO
 {
+    public class IdReceived 
+    {
+        public Guid Id { get; set; }
+    }
+
     public class Home
     {
         public UserHomeDTO User { get; set; } = null!;
 
-        public ICollection<UserHomeDTO> OnlineFriends { get; set; } = null!;
-
         public ICollection<SimplePostDTO> Feed { get; set; } = null!;
+    }
 
+    public class NavbarRequestToSend
+    {
         public bool HasFriendRequest { get; set; }
 
         public bool HasNotification { get; set; }

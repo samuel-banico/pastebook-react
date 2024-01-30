@@ -22,11 +22,6 @@ namespace pastebook_db.Models
         public ICollection<Friend>? FriendList { get; set; }
     }
 
-    public class UserConfirmPassword 
-    {
-        public string Password { get; set; } = null!;
-    }
-
     public class UserReceiveDTO
     {
         public Guid? Id { get; set; }

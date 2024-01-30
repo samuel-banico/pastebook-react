@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using pastebook_db.Data;
+using pastebook_db.DTO;
 using pastebook_db.Models;
 using pastebook_db.Services.Token.TokenData;
 
@@ -14,15 +15,17 @@ namespace pastebook_db.Controllers
         private readonly FriendRequestRepository _friendRequestRepository;
         private readonly NotificationRepository _notificationRepository;
         private readonly UserRepository _userRepository;
+        private readonly HomeRepository _homeRepository;
         private readonly TokenController _tokenController;
 
-        public FriendController(FriendRepository repo, NotificationRepository notificationRepository, FriendRequestRepository friendRequestRepository, UserRepository userRepository, TokenController tokenController)
+        public FriendController(FriendRepository repo, NotificationRepository notificationRepository, FriendRequestRepository friendRequestRepository, UserRepository userRepository, TokenController tokenController, HomeRepository homeRepository)
         {
             _friendRepository = repo;
             _notificationRepository = notificationRepository;
             _friendRequestRepository = friendRequestRepository;
             _userRepository = userRepository;
             _tokenController = tokenController;
+            _homeRepository = homeRepository;
         }
 
         [HttpGet("friend")]
@@ -45,16 +48,24 @@ namespace pastebook_db.Controllers
         }
 
         // returns a list of friends table
-        [HttpGet("friendList")]
-        public ActionResult<List<Friend>> GetAllFriends(Guid userId)
+        [HttpPost("getAllFriends")]
+        public ActionResult<List<Guid>> GetAllFriends(IdReceived user)
         {
-            var friend = _friendRepository.GetAllFriends(userId);
+            var friendList = _friendRepository.GetAllFriends(user.Id);
 
-            if (friend == null)
+            if (friendList == null)
                 return NotFound(new { result = "no_friends" });
 
-            return Ok(friend);
+            var convertedFriendList = new List<Guid>();
+            foreach (var friend in friendList)
+            {
+                if (friend.UserId == user.Id)
+                    convertedFriendList.Add(friend.User_Friend.Id);
+                else
+                    convertedFriendList.Add(friend.User.Id);
+            }
 
+            return Ok(convertedFriendList);
         }
 
         // returns a list of user table
@@ -121,6 +132,29 @@ namespace pastebook_db.Controllers
             _notificationRepository.CreateNotifAcceptedFriendRequest(addFriend.UserId, addFriend.User_FriendId);
 
             return Ok(new { result = "request_accepted", request});
+        }
+
+        [HttpPost("acceptedFriendRequest")]
+        public ActionResult<Friend> AcceptFriendRequest(IdReceived received)
+        {
+            var request = _friendRequestRepository.GetFriendRequest(received.Id);
+
+            if (request == null)
+                return BadRequest(new { result = "not_friends" });
+
+            var addFriend = new Friend 
+            {
+                UserId = request.UserId,
+                User_FriendId = request.User_FriendId,
+                IsBlocked = false,
+                CreatedOn = DateTime.Now
+            };
+
+            _friendRequestRepository.AddedFriend(addFriend, request);
+
+            _notificationRepository.CreateNotifAcceptedFriendRequest(addFriend.UserId, addFriend.User_FriendId);
+
+            return Ok(new { result = "request_accepted", request });
         }
 
         [HttpPut]

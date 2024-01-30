@@ -1,20 +1,17 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableWithoutFeedback, ScrollView } from 'react-native'
-import React, {useEffect} from 'react'
+import { View, StyleSheet, ScrollView } from 'react-native'
+import React from 'react'
 
 import Post from '../../component/home/Post'
 import Feed from '../../component/home/Feed'
 import FriendsOnline from '../../component/home/FriendsOnline'
 
-import globalStyle from '../../assets/styles/globalStyle'
-
-const FeedScreen = ({navigation, details}) => {
-
+const FeedScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <FriendsOnline online={details.onlineFriends}/>
-        <Post navigation={navigation} user={details.user}/>
-        <Feed navigation={navigation} feed={details.feed} />
+        <FriendsOnline navigation={navigation}/>
+        <Post navigation={navigation} enableProfileTransfer={true}/>
+        <Feed navigation={navigation}/>
       </ScrollView>
     </View>
   )

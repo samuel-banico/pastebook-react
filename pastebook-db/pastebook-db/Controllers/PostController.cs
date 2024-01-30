@@ -16,14 +16,16 @@ namespace pastebook_db.Controllers
         private readonly UserRepository _userRepository;
         private readonly FriendRepository _friendRepository;
         private readonly TokenController _tokenController;
+        private readonly HomeRepository _homeRepository;
 
-        public PostController(PostRepository postRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository, TokenController tokenController)
+        public PostController(PostRepository postRepository, NotificationRepository notificationRepository, UserRepository userRepository, FriendRepository friendRepository, TokenController tokenController, HomeRepository homeRepository)
         {
             _postRepository = postRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _friendRepository = friendRepository;
             _tokenController = tokenController;
+            _homeRepository = homeRepository;
         }
 
         [HttpGet]
@@ -47,7 +49,7 @@ namespace pastebook_db.Controllers
         }
 
         [HttpGet("ownUserTimeline")]
-        public ActionResult<List<PostDTO>> GetUserTimeline()
+        public ActionResult<List<PostDTO>> GetUserTimeline ()
         {
             var token = Request.Headers["Authorization"];
             var userId = _tokenController.DecodeJwtToken(token);
@@ -69,6 +71,22 @@ namespace pastebook_db.Controllers
 
                 userTimeline.Add(postDto);
             }
+
+            return Ok(userTimeline);
+        }
+
+        [HttpPost("getOwnProfilePost")]
+        public ActionResult<List<Guid>> GetOwnProfilePost(IdReceived user)
+        {
+            List<Post>? postList = _postRepository
+                .GetAllPostOfUserTimeline(user.Id);
+
+            if (postList == null || postList.Count == 0)
+                return Ok(new { result = "no_post" });
+
+            var userTimeline = new List<Guid>();
+            foreach (var post in postList)
+                userTimeline.Add(post.Id);
 
             return Ok(userTimeline);
         }
@@ -159,7 +177,6 @@ namespace pastebook_db.Controllers
             {
                 var friend = _friendRepository.GetFriendById(addPost.UserId, addPost.FriendId);
                 newPost.FriendId = friend.Id;
-
             }
 
             _postRepository.CreatePost(newPost);

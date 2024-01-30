@@ -1,33 +1,95 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const SingleRequest = () => {
-  return (
-    <View style={[globalStyle.alignToColumn, styles.container]}>
-        <Image 
-            source={require('../../assets/img/user.png')}
-            style={styles.img}
-        />
-        <View style={[styles.detailsContainer]}>
-            <View style={[globalStyle.alignToColumn, {justifyContent: 'space-between'}]}>
-                <Text>Name</Text>
-                <Text>Date Requested</Text>
-            </View>
-            <Text>Mutual Friends</Text>
-            <View style={[globalStyle.alignToColumn, styles.buttonContainer]}>
-                <TouchableOpacity style={[styles.button, globalStyle.colorPimaryBG]}>
-                    <Text style={[styles.buttonText]}>Confirm</Text>
-                </TouchableOpacity>
+import Loading from '../others/Loading'
+import { acceptedFriendRequest, getFriendRequestDetailsById, rejectFriendRequest } from './FriendRequestService'
+import Toast from 'react-native-toast-message'
 
-                <TouchableOpacity style={[styles.button, globalStyle.colorSecondaryBG]}>
-                    <Text style={[styles.buttonText]}>Delete</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    </View>
-  )
+const SingleRequest = ({navigation, item}) => {
+
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [actClick, setActClick] = useState(false)
+
+    useEffect(() => {
+        const fetchData = async() => {
+            await getFriendRequestDetailsById({id: item})
+            .then(response => {
+                setData(response.data)
+            })
+            .catch(error => {
+                console.log("ERROR: Single Request, retrieving single friend request")
+                console.log(error)
+            })
+            setLoading(false);
+        } 
+
+        fetchData();
+    }, [actClick])
+
+    const confirmClick = async() => {
+        await acceptedFriendRequest({id:item})
+        .then(response => {
+            console.log(response.data)
+            Toast.show({type: 'success', text1:'Friend request', text2: `Accepted ${data.requestedUser.fullname} friend request`})
+        })
+        .catch(error => {
+            console.log('ERROR: Single Request, Rejecting Friend Request')
+            console.log(error)
+        })
+
+        setActClick(!actClick)
+    }
+
+    const rejectClick = async() => {
+        await rejectFriendRequest({id:item})
+        .then(response => {
+            console.log(response.data)
+            Toast.show({type: 'success', text1:'Friend request', text2: `Rejected ${data.requestedUser.fullname} friend request`})
+
+        })
+        .catch(error => {
+            console.log('ERROR: Single Request, Rejecting Friend Request')
+            console.log(error)
+        })
+
+        setActClick(!actClick)
+    }
+
+    return (
+        <>
+            {
+                loading ? <Loading/> :
+                <View style={[globalStyle.alignToColumn, styles.container]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile', {id: data.requestedUser.userId})}>
+                        <Image 
+                            source={{uri: data.requestedUser.profilePicture}}
+                            style={styles.img}/>
+                    </TouchableOpacity>
+                    <View style={[styles.detailsContainer]}>
+                        <View style={[globalStyle.alignToColumn, {justifyContent: 'space-between'}]}>
+                            <TouchableOpacity onPress={() => navigation.navigate('Profile', {id: data.requestedUser.userId})}>
+                                <Text>{data.requestedUser.fullname}</Text>
+                            </TouchableOpacity>
+                            <Text>{data.dateCreated}</Text>
+                        </View>
+                        <View style={[globalStyle.alignToColumn, styles.buttonContainer]}>
+                            <TouchableOpacity onPress={confirmClick}
+                                style={[styles.button, globalStyle.colorPimaryBG]}>
+                                <Text style={[styles.buttonText]}>Confirm</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={rejectClick}
+                                style={[styles.button, globalStyle.colorSecondaryBG]}>
+                                <Text style={[styles.buttonText]}>Delete</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            }
+        </>
+    )
 }
 
 export default SingleRequest

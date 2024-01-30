@@ -39,6 +39,8 @@ namespace pastebook_db.Data
         public List<Friend> GetAllFriends(Guid userId)
         {
             var friendList = _context.Friends
+                .Include(f => f.User_Friend)
+                .Include(f => f.User)
                 .Where(f => f.UserId == userId || f.User_FriendId == userId)
                 .ToList();
 
@@ -70,13 +72,14 @@ namespace pastebook_db.Data
 
         public List<User> GetAllOnlineFriends(User user) 
         {
-            if (user.FriendList == null)
-                return new List<User>();
+            var friendList = _context.Friends
+            .Where(f => f.UserId == user.Id || f.User_FriendId == user.Id)
+            .ToList();
 
-            var friendList = new List<User>();
+            var friendLists = new List<User>();
 
             Guid? friendId;
-            foreach (var friend in user.FriendList)
+            foreach (var friend in friendList)
             {
                 if (friend.UserId != user.Id)
                     friendId = friend.UserId;
@@ -86,10 +89,10 @@ namespace pastebook_db.Data
                 var foundFriend = _context.Users.Find(friendId);
 
                 if(foundFriend.IsCurrentlyActive)
-                    friendList.Add(foundFriend);
+                    friendLists.Add(foundFriend);
             }
 
-            return friendList;
+            return friendLists;
         }
 
         public List<Friend> GetAllBlockedFriends(Guid userId)

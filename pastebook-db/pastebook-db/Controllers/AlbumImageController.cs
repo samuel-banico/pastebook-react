@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using pastebook_db.Data;
+using pastebook_db.DTO;
 using pastebook_db.Models;
 using pastebook_db.Services.FunctionCollection;
 using pastebook_db.Services.Token.TokenData;
@@ -67,7 +68,67 @@ namespace pastebook_db.Controllers
 
             _albumImageRepository.CreateAlbumImage(newAlbumImage);
 
-            return Ok(new { result = "created_albumImage", newAlbumImage });
+            return Ok();
+        }
+
+        
+        [HttpPost("getAlbumImagePhotoById")]
+        public ActionResult<AlbumImage> GetAlbumImagePhotoById(IdReceived received)
+        {
+            var image = _albumImageRepository.GetAlbumImageById(received.Id);
+
+            if(image == null)
+                return BadRequest(new { result = "no_image"});
+
+            var imageToReturn = new SingleAlbumImageToDisplay 
+            {
+                Id = received.Id,
+                Image = HelperFunction.PictureExists(image.Image, Path.Combine("wwwroot", "images", "default_albumImage.png"))
+            };
+
+            return Ok(imageToReturn);
+        }
+
+        [HttpPost("getAlbumImageDetailsById")]
+        public ActionResult<AlbumImage> getAlbumImageDetailsById(IdReceived received)
+        {
+            var token = Request.Headers["Authorization"];
+            var userId = _tokenController.DecodeJwtToken(token);
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+                return BadRequest(new { result = "no_user" });
+
+            var image = _albumImageRepository.GetAlbumImageById(received.Id);
+
+            if (image == null)
+                return BadRequest(new { result = "no_image" });
+
+            var imageToReturn = new AlbumImageDetails
+            {
+                Id = received.Id,
+                Image = HelperFunction.PictureExists(image.Image, Path.Combine("wwwroot", "images", "default_albumImage.png")),
+                CreatedOn = image.CreatedOn.ToString("MM-dd-yyyy"),
+            };
+
+            if (image.AlbumImageLikesList != null && image.AlbumImageLikesList.Count > 0)
+            {
+                imageToReturn.LikeCount = image.AlbumImageLikesList.Count;
+
+                imageToReturn.HasLiked = image.AlbumImageLikesList.Any(u => u.User.Id == user.Id) ? true : false;
+            }
+            else 
+            {
+                imageToReturn.LikeCount = 0;
+                imageToReturn.HasLiked = false;
+            }
+
+            if (image.AlbumImageCommentsList != null && image.AlbumImageCommentsList.Count > 0)
+                imageToReturn.CommentCount = image.AlbumImageCommentsList.Count;
+            else
+                imageToReturn.CommentCount = 0;
+
+            return Ok(imageToReturn);
         }
 
         [HttpPut]

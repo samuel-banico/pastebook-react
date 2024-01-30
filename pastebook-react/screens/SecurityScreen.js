@@ -3,10 +3,10 @@ import React from 'react'
 
 import Security from '../component/security/Security'
 
-const SecurityScreen = () => {
+const SecurityScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-        <Security/>
+        <Security navigation={navigation}/>
     </View>
   )
 }

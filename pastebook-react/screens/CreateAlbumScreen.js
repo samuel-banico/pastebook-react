@@ -3,10 +3,10 @@ import React from 'react'
 
 import CreateAlbum from '../component/album/CreateAlbum'
 
-const CreateAlbumScreen = () => {
+const CreateAlbumScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
-      <CreateAlbum/>
+      <CreateAlbum navigation={navigation}/>
     </View>
   )
 }

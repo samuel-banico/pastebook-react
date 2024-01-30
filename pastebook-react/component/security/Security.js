@@ -9,11 +9,15 @@ import globalStyle from '../../assets/styles/globalStyle'
 
 import EditSecurity from './EditSecurity'
 import { InputEmpty } from '../registration/RegisterValidation'
+import Entypo from '@expo/vector-icons/Entypo'
 
 
-const Security = () => {
+const Security = ({navigation}) => {
 
   const [showSecurity, setShowSecurity] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(true);
+  const togglePassword = () => setShowPassword(!showPassword);
 
   const [passwordSecurity, setPasswordSecurity] = useState({
     value: '',
@@ -76,10 +80,15 @@ const Security = () => {
         !showSecurity && (
           <View style={[styles.confirmContainer]}>
             <TextInput 
-              style={[styles.textContainer, {borderColor: passwordSecurity.style}]} 
-              placeholder='Enter Password'
-              value={passwordSecurity.value}
-              onChangeText={(e) => changeSecurityValue(e)}/>
+                style={[styles.textContainer, {borderColor: passwordSecurity.style}]} 
+                placeholder='Enter Password'
+                value={passwordSecurity.value}
+                onChangeText={(e) => changeSecurityValue(e)}
+                secureTextEntry={showPassword}/>
+              <TouchableOpacity onPress={togglePassword} style={styles.icon}>
+                <Entypo name={showPassword ? 'eye' : 'eye-with-line'} size={25} style={styles.icon}/>
+              </TouchableOpacity>
+            
             <TouchableOpacity 
               style={[globalStyle.colorSecondaryBG, styles.buttonContainer]}
               onPress={confirmClick}>
@@ -91,7 +100,7 @@ const Security = () => {
       
       {
         showSecurity && (
-          <EditSecurity/>
+          <EditSecurity navigation={navigation}/>
         )
       }
     </View>
@@ -120,5 +129,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 5,
     padding: 5
-  }
+  },
+  icon: {
+    position: 'absolute',
+    right: 12,
+    top: '28%',
+    transform: [{ translateY: -7.5 }],
+  },
 })

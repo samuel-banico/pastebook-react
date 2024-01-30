@@ -4,10 +4,10 @@ import React from 'react'
 import FriendRequest from '../../component/friendRequest/FriendRequest'
 
 
-const FriendRequestScreen = () => {
+const FriendRequestScreen = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1}}>
-      <FriendRequest/>
+      <FriendRequest navigation={navigation}/>
     </SafeAreaView>
   )
 }

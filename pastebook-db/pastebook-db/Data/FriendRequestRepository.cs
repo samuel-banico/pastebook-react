@@ -44,6 +44,7 @@ namespace pastebook_db.Data
         public FriendRequest? GetFriendRequest(Guid id)
         {
             return _context.FriendRequests
+                .Include(x => x.User)
                 .FirstOrDefault(u => u.Id == id);
         }
 

@@ -1,14 +1,37 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { getAlbumImagePhotoById } from './AlbumService'
 
-const SinglePhoto = ({navigation}) => {
+const SinglePhoto = ({navigation, item}) => {
+
+  const [data, setData] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getAlbumImagePhotoById({id:item})
+      .then(response => {
+        setData(response.data)
+      })
+      .catch(error => {
+        console.log('ERROR: Single Photo')
+        console.log(error)
+      })
+
+      setLoading(false)
+    } 
+
+    fetchData()
+  }, [])
+
   return (
     <View style={styles.container}>
-        <TouchableOpacity onPress={() => navigation.navigate('Photo')}>
-        <Image
-            style={styles.img}
-            source={require('../../assets/img/image.png')}/>
-        </TouchableOpacity>    
+      <TouchableOpacity onPress={() => navigation.navigate('Photo', {id: item})}>
+          <Image
+            style={styles.img} 
+            source={{uri: data.image}}/>
+        </TouchableOpacity>  
+          
     </View>
   )
 }
@@ -21,7 +44,7 @@ const styles = StyleSheet.create({
         marginVertical: 5
     },
     img: {
-        width: 100,
-        height: 100,
-      }
+      width: 100,
+      height: 100,
+    }
 })

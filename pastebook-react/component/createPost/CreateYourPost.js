@@ -7,11 +7,14 @@ import { Picker } from '@react-native-picker/picker';
 import { createPost } from './PostService';
 
 import globalStyle from '../../assets/styles/globalStyle'
+import { getUserById } from '../profile/ProfileService';
+import { getTokenData } from '../others/LocalStorage';
+import { getHomeUserData } from '../home/HomeService';
 
 const CreateYourPost = ({data, navigation}) => {
 
   const [userData, setUserData] = useState({})
-  const [friendData, setFriendData] = useState({})
+  const [friendData, setFriendData] = useState(null)
 
   const [postData, setPostData] = useState({
     content: '',
@@ -19,9 +22,31 @@ const CreateYourPost = ({data, navigation}) => {
   })
 
   useEffect(() => {
-    setUserData(data.user);
-    setFriendData(data.friend)
-  })
+    const fetchData = async() => {
+      var token = await getTokenData();
+
+      await getHomeUserData(token)
+      .then(response => {
+        setUserData(response.data)
+      })
+      .catch(error => {
+        console.log('ERROR: CreateYourPost, Getting User Data from backend')
+        console.log(error.response)
+      })
+
+      if(data)
+        await getUserById({id: data})
+        .then(response => {
+          setFriendData(response.data)
+        })
+        .catch(error => {
+          console.log('ERROR: CreateYourPost, Getting Friend Data from backend')
+          console.log(error)
+        })
+    }
+    
+    fetchData()
+  }, [])
 
   const [shareOption, setShareOption] = useState(true)
   const showToast = () => {
@@ -49,18 +74,19 @@ const CreateYourPost = ({data, navigation}) => {
   }
 
   const postClick = () => {
-    var friendId = null;
-    if(friendData != null) 
-      friendId = friendData.userId
-
-    var data = {
+    var dataToSend = {
       content : postData.content,
       isPublic : postData.isPublic,
-      userId : userData.userId,
-      friendId : friendId
+      userId : data,
+      friendId : userData.userId
     }
 
-    handlePostService(data);
+    if(dataToSend.userId == null) {
+      dataToSend.userId = dataToSend.friendId
+      dataToSend.friendId = null
+    }
+
+    handlePostService(dataToSend);
   }
 
   return (
@@ -73,7 +99,7 @@ const CreateYourPost = ({data, navigation}) => {
         <View style={[{justifyContent: 'center', marginLeft: 5}]}>
           <Text multiline={true}>{userData.fullname}</Text>
           {
-            friendData && <Text>To {friendData.fullname}</Text>
+            friendData && <Text style={globalStyle.textParagraph}>To {friendData.fullname}</Text>
           }
         </View>
       </View>

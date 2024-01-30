@@ -21,15 +21,26 @@ namespace pastebook_db.Data
             return _context.PostLikes.FirstOrDefault(pL => pL.PostId == postId && pL.UserId == userId);
         }
 
-        public PostLike? GetPostLikeByUserId(Guid userId)
+        public PostLike? GetPostLikeById(Guid postLikeId)
         {
-            return _context.PostLikes.FirstOrDefault(pL => pL.UserId == userId);
+            return _context.PostLikes
+                .Include(p => p.Post)
+                .Include(u => u.User)
+                .First(pL => pL.Id == postLikeId);
         }
-
 
         public List<PostLike> GetAllPostLikes()
         {
             return _context.PostLikes.ToList();
+        }
+
+        public List<PostLike> GetAllLikesByPostId(Guid id)
+        {
+            return _context.PostLikes
+                .Include(p => p.Post)
+                .Include(u => u.User)
+                .Where(pI => pI.PostId == id)
+                .ToList();
         }
 
         public void CreatePostLike(PostLike postLike)

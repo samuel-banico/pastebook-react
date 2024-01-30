@@ -11,8 +11,10 @@ const Logout = ({navigation}) => {
   }
 
   const logOut = () => {
-    removeToken()
-    navigation.navigate('Login')
+    removeToken().then(response => {
+      navigation.navigate('Login')
+
+    })
   }
 
   return (

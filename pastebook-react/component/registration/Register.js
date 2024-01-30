@@ -317,7 +317,7 @@ const Register = ({navigation, isLoading}) => {
 
     month = month < 10 ? `0${month}` : month
     day = day < 10 ? `0${day}` : day
-    return `${day}-${month}-${year}`
+    return `${month}/${day}/${year}`
   }
 
   return (
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   icon: {
     position: 'absolute',
     right: 5,
-    top: '50%', // You may need to adjust this value based on your design
-    transform: [{ translateY: -7.5 }], // Adjust the translateY based on the icon size
+    top: '50%',
+    transform: [{ translateY: -7.5 }],
   },
 })

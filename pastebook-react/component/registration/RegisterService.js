@@ -1,6 +1,3 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-
 import axios from 'axios';
 
 import { config } from '../../assets/config/config';
@@ -12,7 +9,6 @@ export const register = async(data) => {
 }
 
 export const login = async(data) => {
-  console.log(data);
   return await axios.post(accessURL + '/login', data)
 }
 

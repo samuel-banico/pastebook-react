@@ -1,6 +1,5 @@
 import { Button, SafeAreaView, StyleSheet, Text, View, Switch } from 'react-native'
-import React, { useState } from 'react'
-import { useRoute } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react'
 
 import Collapsible from 'react-native-collapsible';
 
@@ -11,25 +10,62 @@ import HR from '../others/HR'
 
 import globalStyle from '../../assets/styles/globalStyle'
 
-const Settings = ({navigation, data}) => {
+import { getTokenData } from '../others/LocalStorage';
+
+import { settingsGetUserData, toggleViewPublic } from './SettingsService';
+
+const Settings = ({navigation}) => {
+
+    const [data, setData] = useState({})
+    const [isEnabled, setIsEnabled] = useState({
+        viewPublic: { state: null},
+        darkMode: {state: false}
+    });
     const [isCollapsed, setIsCollapsed] = useState(true);
+
+    //initialize data
+    useEffect(() => {
+        const fetchData = async () => {
+            var token = await getTokenData();
+
+            await settingsGetUserData(token)
+            .then(response => {
+                setData(response.data)
+                toggleSwitch('viewPublic', response.data.viewPublicPost)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        }
+
+        fetchData();
+    }, [isEnabled.viewPublic])
 
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed);
     }
-    
-    const [isEnabled, setIsEnabled] = useState({
-        viewPublic: { state: true},
-        darkMode: {state: true}
-    });
 
-    const toggleSwitch = (fieldName) => {
+    const toggleSwitch = (fieldName, value) => {
         setIsEnabled({
             ...isEnabled,
             [fieldName]: {
-                state: !isEnabled[fieldName].state
+                state: value
             }
         });
+    }
+
+    const handleViewPublic = async(value) => {
+        var token = await getTokenData();
+
+        await toggleViewPublic(token, {viewPublic: value})
+        .then(response => {
+            
+        })
+        .catch(error => {
+            console.log(error)
+        })
+
+        toggleSwitch('viewPublic', value)
     }
 
     return (
@@ -41,16 +77,16 @@ const Settings = ({navigation, data}) => {
                 <Button title='click' onPress={toggleCollapse}/>
                 
                 <Collapsible collapsed={isCollapsed} enablePointerEvents={true}>
-                    <View style={[globalStyle.alignToColumn]}>
+                    <View style={[globalStyle.alignToColumn, styles.switchContainer]}>
                         <Text>View Public Posts</Text>
                         <Switch 
                             trackColor={{false: '#767577', true: '#67233e'}}
                             thumbColor={isEnabled.viewPublic.state ? '#67233e' : '#7ed3bb'}
                             ios_backgroundColor="#3e3e3e"
-                            onValueChange={() => toggleSwitch('viewPublic')}
+                            onValueChange={(e) => handleViewPublic(e)}
                             value={isEnabled.viewPublic.state}/>
                     </View>
-                    <View style={[globalStyle.alignToColumn]}>
+                    <View style={[globalStyle.alignToColumn, styles.switchContainer]}>
                         <Text>Dark Mode</Text>
                         <Switch 
                             trackColor={{false: '#ffffff', true: '#000000'}}
@@ -74,5 +110,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center'
+    }, 
+    switchContainer: {
+        justifyContent: 'space-between',
+        marginHorizontal: 50
     }
 })
